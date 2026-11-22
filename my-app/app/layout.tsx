@@ -1,4 +1,5 @@
-﻿import type { Metadata } from "next";
+﻿import "./globals.css";
+import type { Metadata } from "next";
 import { TelemetryProvider } from './TelemetryContext';
 
 export const metadata: Metadata = {
@@ -19,3 +20,4 @@ export default function RootLayout({
     </html>
   );
 }
+
