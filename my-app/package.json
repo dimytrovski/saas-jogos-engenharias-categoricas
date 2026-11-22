@@ -17,18 +17,22 @@
         "next": "16.4.6",
         "obs": "^1.0.2",
         "obs-websocket-js": "^5.0.8",
+        "pg": "^8.23.1",
         "react": "19.3.0",
         "react-dom": "19.3.0",
+        "redis": "^6.3.1",
+        "socket.io": "^4.8.4",
         "websock": "^0.3.19"
     },
     "devDependencies": {
         "@tailwindcss/turbopack": "4.3.3",
         "@types/node": "^20",
+        "@types/pg": "^8.23.1",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.4.6",
         "tailwindcss": "4.3.3",
-        "typescript": "^5"
+        "typescript": "5.9.3"
     }
 }

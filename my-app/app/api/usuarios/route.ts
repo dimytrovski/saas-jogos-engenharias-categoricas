@@ -1,6 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
-import pool from "../../../lib/db";
+import pool, { getPool } from "../../../lib/db";
 
 function gerarHashSenha(senha: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     if (!nome_completo || !nickname || !email || !senha || !cpf || !telefone_whatsapp || !data_nascimento) {
       return NextResponse.json(
-        { error: "Preencha todos os campos obrigatórios." },
+        { error: "Preencha todos os campos obrigatrios." },
         { status: 400 }
       );
     }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const cpfLimpo = String(cpf).replace(/\D/g, "");
     if (cpfLimpo.length !== 11) {
       return NextResponse.json(
-        { error: "CPF inválido. Informe exatamente 11 dígitos." },
+        { error: "CPF invlido. Informe exatamente 11 dgitos." },
         { status: 400 }
       );
     }
@@ -70,11 +70,11 @@ export async function POST(request: Request) {
       chave_pix ? String(chave_pix).trim() : null,
     ];
 
-    const [result]: any = await pool.execute(sql, values);
+    const [result]: any = await (await getPool()).execute(sql, values);
 
     return NextResponse.json(
       {
-        message: "Usuário cadastrado com sucesso!",
+        message: "Usurio cadastrado com sucesso!",
         id: result.insertId,
       },
       { status: 201 }
@@ -82,14 +82,14 @@ export async function POST(request: Request) {
   } catch (error: any) {
     if (error?.code === "ER_DUP_ENTRY") {
       return NextResponse.json(
-        { error: "E-mail, Nickname ou CPF já cadastrado no sistema." },
+        { error: "E-mail, Nickname ou CPF j cadastrado no sistema." },
         { status: 409 }
       );
     }
 
     console.error("[POST /api/usuarios] Erro:", error);
     return NextResponse.json(
-      { error: "Erro interno ao salvar usuário no MySQL." },
+      { error: "Erro interno ao salvar usurio no MySQL." },
       { status: 500 }
     );
   }

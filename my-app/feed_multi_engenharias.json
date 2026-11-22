@@ -1,0 +1,18 @@
+{
+    "totalItens":  1,
+    "modoAcesso":  "Addon-Filtros-Rotas-Ativo",
+    "plataformaConsenso":  "Consenso-Agnostico-Web",
+    "usuarioId":  "player_ouro",
+    "itens":  [
+                  {
+                      "UsuarioId":  "player_ouro",
+                      "ModoAcesso":  "Addon-Filtros-Rotas-Ativo",
+                      "PlataformaConsenso":  "Consenso-Agnostico-Web",
+                      "Engenharia":  "Engenharia de Pesca",
+                      "ProblemaReal":  "Perda de qualidade e quebra da cadeia do frio no armazenamento e transporte",
+                      "OrigemColeta":  "Fallback-Seguro",
+                      "RotaBackend":  "/api/v2/rotas/avancado",
+                      "GeradoEm":  "2026-11-22 14:18:26"
+                  }
+              ]
+}

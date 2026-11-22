@@ -1,4 +1,4 @@
-import { getPool, getDbConfig } from "./db";
+﻿import { getPool, getDbConfig } from "./db";
 
 export interface DbErrorInfo {
   message: string;

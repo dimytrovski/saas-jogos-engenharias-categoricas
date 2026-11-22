@@ -1,18 +1,7 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/hls/:path*",
-        destination: "http://127.0.0.1/hls/:path*",
-      },
-      {
-        source: "/dash/:path*",
-        destination: "http://127.0.0.1/dash/:path*",
-      },
-    ];
-  },
+const nextConfig = {
+images: {
+    remotePatterns: [],
+  }
 };
 
-export default nextConfig;
+module.exports = nextConfig;

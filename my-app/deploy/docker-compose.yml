@@ -1,0 +1,32 @@
+﻿version: '3.8'
+
+services:
+  nextjs-app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://cache-cluster:6379
+      - DATABASE_WRITE_URL=\
+      - DATABASE_READ_URL=\
+    deploy:
+      replicas: 4
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - cache-cluster
+
+  cache-cluster:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

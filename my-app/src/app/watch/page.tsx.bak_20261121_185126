@@ -1,0 +1,9 @@
+﻿import UniversalHlsPlayer from "@/components/UniversalHlsPlayer";
+
+export default function WatchPage() {
+  return (
+    <main style={{ minHeight: "100vh", background: "#0b0f19", color: "#f9fafb", paddingTop: 24 }}>
+      <UniversalHlsPlayer src="/hls/teste.m3u8" title="Arena Indie — Transmissão Global" />
+    </main>
+  );
+}
