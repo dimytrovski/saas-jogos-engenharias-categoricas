@@ -12,7 +12,8 @@ function signPayload(payloadB64: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const __passCode = String((body as { passCode?: string } | undefined)?.passCode || "").trim();
+    const __reqBody = await req.clone().json().catch(() => ({}));
+    const __passCode = String((typeof __reqBody !== "undefined" ? (__reqBody as { passCode?: string })?.passCode : "") || "").trim();
     if (__passCode) {
       const __passCheck = await validateLivePassAccess(__passCode);
       if (!__passCheck.allowed) {
@@ -21,6 +22,8 @@ export async function POST(req: NextRequest) {
           { status: __passCheck.httpStatus || 403 }
         );
       }
+    }
+
     }
 
     const __scaleGuard = await enforceResourceCreation({ resourceType: "stream" });
@@ -87,5 +90,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ valid: false, reason: "Payload inválido." }, { status: 401 });
   }
 }
+
 
 
