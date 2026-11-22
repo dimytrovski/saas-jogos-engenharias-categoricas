@@ -55,6 +55,8 @@ const SDLC_STAGES: { label: SdlcStage; pct: number }[] = [
   { label: "Licenca Ativa em Producao", pct: 100 }
 ];
 
+const PHI = 1.61803398875;
+
 function formatBrl(value: number) {
   return value.toLocaleString("pt-BR", {
     style: "currency",
@@ -68,8 +70,7 @@ function deliveryLabel(mode: DeliveryMode) {
   return "Hibrido (Disco + Nuvem)";
 }
 
-// Sintese acustica limpa via Web Audio API (sem dependencia externa)
-function playAcousticPulse(freqHz = 220, durationSec = 0.24) {
+function playAcousticPulse(freqHz = 264, durationSec = 0.22) {
   if (typeof window === "undefined") return;
   const AudioCtx =
     window.AudioContext ||
@@ -84,13 +85,13 @@ function playAcousticPulse(freqHz = 220, durationSec = 0.24) {
 
     osc.type = "triangle";
     osc.frequency.setValueAtTime(freqHz, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freqHz * 1.35, ctx.currentTime + durationSec * 0.7);
+    osc.frequency.exponentialRampToValueAtTime(freqHz * PHI, ctx.currentTime + durationSec * 0.75);
 
     sub.type = "sine";
-    sub.frequency.setValueAtTime(freqHz * 0.5, ctx.currentTime);
+    sub.frequency.setValueAtTime(freqHz / PHI, ctx.currentTime);
 
     gain.gain.setValueAtTime(0.001, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    gain.gain.linearRampToValueAtTime(0.075, ctx.currentTime + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0008, ctx.currentTime + durationSec);
 
     osc.connect(gain);
@@ -105,109 +106,135 @@ function playAcousticPulse(freqHz = 220, durationSec = 0.24) {
       ctx.close().catch(() => {});
     }, (durationSec + 0.1) * 1000);
   } catch {
-    // Ignora caso o navegador bloqueie audio antes de gesto do usuario
+    // Ignora bloqueio antes de interacao
   }
 }
 
-function renderCerroGradle3D(
+function renderClosedAppIcon3D(
   ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
+  size: number,
   t: number,
   boostLevel: number,
-  isMini: boolean
+  showGuides: boolean
 ) {
-  // Projecao 3D isometrica com rotacao sutil
-  const yaw = Math.sin(t * 0.9) * 0.22;
+  // Proporcoes fechadas baseadas no raio de icone R e na razao aurea PHI
+  const cx = size / 2;
+  const cy = size / 2;
+  const outerR = size * 0.42;
+  const innerR = outerR / PHI;
+  const safeR = outerR * 0.86;
+
+  ctx.clearRect(0, 0, size, size);
+
+  // Fundo escuro profundo do icone
+  const bg = ctx.createRadialGradient(cx, cy * 0.85, outerR * 0.1, cx, cy, outerR * 1.15);
+  bg.addColorStop(0, "#0f1c33");
+  bg.addColorStop(0.65, "#070d19");
+  bg.addColorStop(1, "#03060c");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, size, size);
+
+  // Moldura fechada de icone (squircle / circulo geometrico)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(45, 212, 191, 0.55)";
+  ctx.lineWidth = Math.max(1.5, size * 0.008);
+  ctx.stroke();
+
+  // Anel de proporcao aurea (R / phi)
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.22)";
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  if (showGuides) {
+    // Eixos geometricos e grade de construcao do icone
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.14)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - safeR, cy);
+    ctx.lineTo(cx + safeR, cy);
+    ctx.moveTo(cx, cy - safeR);
+    ctx.lineTo(cx, cy + safeR);
+    ctx.moveTo(cx - safeR * 0.707, cy - safeR * 0.707);
+    ctx.lineTo(cx + safeR * 0.707, cy + safeR * 0.707);
+    ctx.moveTo(cx + safeR * 0.707, cy - safeR * 0.707);
+    ctx.lineTo(cx - safeR * 0.707, cy + safeR * 0.707);
+    ctx.stroke();
+  }
+
+  // Recorte circular fechado para manter o emblema contido dentro do icone
+  ctx.beginPath();
+  ctx.arc(cx, cy, outerR - 2, 0, Math.PI * 2);
+  ctx.clip();
+
+  // Projecao 3D contida dentro do raio do icone
+  const yaw = Math.sin(t * 1.1) * 0.2;
   const cosY = Math.cos(yaw);
   const sinY = Math.sin(yaw);
-  const pitch = 0.26;
+  const pitch = 0.24;
   const cosP = Math.cos(pitch);
   const sinP = Math.sin(pitch);
-
-  const scale = isMini ? Math.min(w, h) * 0.26 : Math.min(w, h) * 0.34;
-  const cx = w * (isMini ? 0.52 : 0.46);
-  const cy = h * (isMini ? 0.58 : 0.56);
+  const unit = safeR * 0.44;
 
   const project3D = (x: number, y: number, z: number) => {
     const x1 = x * cosY - z * sinY;
     const z1 = x * sinY + z * cosY;
     const y2 = y * cosP - z1 * sinP;
     const z2 = y * sinP + z1 * cosP;
-    const persp = 4.2 / Math.max(1.8, 4.2 + z2);
+    const persp = 4.5 / Math.max(2.2, 4.5 + z2);
     return {
-      px: cx + x1 * scale * persp,
-      py: cy + y2 * scale * persp,
-      depth: z2
+      px: cx + x1 * unit * persp,
+      py: cy + (y2 + 0.08) * unit * persp
     };
   };
 
-  // Fundo escuro com grade espacial 3D
-  const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, "#04070f");
-  bg.addColorStop(0.5, "#081224");
-  bg.addColorStop(1, "#050914");
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, w, h);
+  // Corpo 3D compacto e simetrico do elefante
+  const rings = 10;
+  const pts = 12;
+  ctx.strokeStyle = "rgba(148, 163, 184, 0.36)";
+  ctx.lineWidth = Math.max(1, size * 0.0045);
 
-  ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
-  ctx.lineWidth = 1;
-  const gridStep = isMini ? 18 : 28;
-  for (let gx = 0; gx <= w; gx += gridStep) {
-    ctx.beginPath();
-    ctx.moveTo(gx, 0);
-    ctx.lineTo(gx, h);
-    ctx.stroke();
-  }
-  for (let gy = 0; gy <= h; gy += gridStep) {
-    ctx.beginPath();
-    ctx.moveTo(0, gy);
-    ctx.lineTo(w, gy);
-    ctx.stroke();
-  }
-
-  // Corpo estrutural do elefante em malha 3D (elipsoide + cabeca + patas + tromba energizada)
-  const bodyRings = isMini ? 8 : 14;
-  const ringPts = isMini ? 10 : 16;
-  ctx.strokeStyle = "rgba(148, 163, 184, 0.32)";
-  ctx.lineWidth = isMini ? 1 : 1.3;
-
-  for (let i = 0; i <= bodyRings; i++) {
-    const u = (i / bodyRings) * Math.PI;
-    const bx = Math.cos(u) * 1.15 - 0.15;
-    const rx = Math.sin(u) * 0.78;
-    const rz = Math.sin(u) * 0.66;
+  for (let i = 0; i <= rings; i++) {
+    const u = (i / rings) * Math.PI;
+    const bx = Math.cos(u) * 0.92 - 0.16;
+    const rx = Math.sin(u) * 0.62;
+    const rz = Math.sin(u) * 0.52;
 
     ctx.beginPath();
-    for (let j = 0; j <= ringPts; j++) {
-      const v = (j / ringPts) * Math.PI * 2;
-      const pt = project3D(bx, -Math.cos(v) * rx + 0.05, Math.sin(v) * rz);
-      if (j === 0) ctx.moveTo(pt.px, pt.py);
-      else ctx.lineTo(pt.px, pt.py);
+    for (let j = 0; j <= pts; j++) {
+      const v = (j / pts) * Math.PI * 2;
+      const p = project3D(bx, -Math.cos(v) * rx, Math.sin(v) * rz);
+      if (j === 0) ctx.moveTo(p.px, p.py);
+      else ctx.lineTo(p.px, p.py);
     }
     ctx.stroke();
   }
 
-  // Cabeca e orelhas estruturais 3D
-  const headCenter = project3D(0.88, -0.22, 0.08);
+  // Cabeca geometrica
+  const head = project3D(0.68, -0.18, 0.05);
   ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = isMini ? 1.4 : 2;
+  ctx.lineWidth = Math.max(1.2, size * 0.006);
   ctx.beginPath();
-  ctx.arc(headCenter.px, headCenter.py, scale * 0.42, 0, Math.PI * 2);
+  ctx.arc(head.px, head.py, unit * 0.34, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Quatro patas em coordenadas 3D
+  // Quatro apoios/patas proporcionais
   const legs = [
-    [-0.75, 0.45, 0.38],
-    [-0.75, 0.45, -0.38],
-    [0.52, 0.45, 0.38],
-    [0.52, 0.45, -0.38]
+    [-0.58, 0.34, 0.3],
+    [-0.58, 0.34, -0.3],
+    [0.4, 0.34, 0.3],
+    [0.4, 0.34, -0.3]
   ];
   legs.forEach(([lx, ly, lz]) => {
-    const top = project3D(lx, ly - 0.22, lz);
-    const bot = project3D(lx, ly + 0.55, lz);
+    const top = project3D(lx, ly - 0.14, lz);
+    const bot = project3D(lx, ly + 0.42, lz);
     ctx.strokeStyle = "rgba(148, 163, 184, 0.55)";
-    ctx.lineWidth = isMini ? 2 : 3.2;
+    ctx.lineWidth = Math.max(1.5, size * 0.009);
     ctx.beginPath();
     ctx.moveTo(top.px, top.py);
     ctx.lineTo(bot.px, bot.py);
@@ -215,28 +242,27 @@ function renderCerroGradle3D(
   });
 
   // Tromba curva 3D turbinada por fiacao eletrica multifasica
-  const trunkSteps = isMini ? 16 : 28;
-  const trunkPoints: { x: number; y: number; z: number }[] = [];
+  const trunkSteps = 22;
+  const trunk: { x: number; y: number; z: number }[] = [];
   for (let s = 0; s <= trunkSteps; s++) {
     const k = s / trunkSteps;
-    const tx = 1.18 + Math.sin(k * Math.PI * 0.85) * 0.65;
-    const ty = -0.1 + k * 0.88 - Math.sin(k * Math.PI) * 0.16;
-    const tz = 0.12 + Math.cos(k * Math.PI * 1.2) * 0.18;
-    trunkPoints.push({ x: tx, y: ty, z: tz });
+    const tx = 0.92 + Math.sin(k * Math.PI * 0.85) * 0.48;
+    const ty = -0.08 + k * 0.66 - Math.sin(k * Math.PI) * 0.12;
+    const tz = 0.08 + Math.cos(k * Math.PI * 1.1) * 0.14;
+    trunk.push({ x: tx, y: ty, z: tz });
   }
 
-  // Nucleo da tromba
   ctx.strokeStyle = "#2dd4bf";
-  ctx.lineWidth = isMini ? 3.5 : 6.5;
+  ctx.lineWidth = Math.max(2.5, size * 0.017);
   ctx.beginPath();
-  trunkPoints.forEach((pt, idx) => {
+  trunk.forEach((pt, idx) => {
     const p = project3D(pt.x, pt.y, pt.z);
     if (idx === 0) ctx.moveTo(p.px, p.py);
     else ctx.lineTo(p.px, p.py);
   });
   ctx.stroke();
 
-  // Tres cabos de fiacao eletrica helicoidais envolvendo e turbinando a tromba
+  // Fiaca eletrica helicoidal envolvendo e turbinando a tromba
   const wires = [
     { color: "#f59e0b", offset: 0 },
     { color: "#38bdf8", offset: (Math.PI * 2) / 3 },
@@ -245,75 +271,58 @@ function renderCerroGradle3D(
 
   wires.forEach((wire) => {
     ctx.strokeStyle = wire.color;
-    ctx.lineWidth = isMini ? 1.2 : 2;
+    ctx.lineWidth = Math.max(1.1, size * 0.0055);
     ctx.beginPath();
-    trunkPoints.forEach((pt, idx) => {
+    trunk.forEach((pt, idx) => {
       const k = idx / trunkSteps;
-      const rad = (0.14 - k * 0.06) * (1 + boostLevel * 0.12);
+      const rad = (0.11 - k * 0.045) * (1 + boostLevel * 0.1);
       const ang = k * Math.PI * 6 - t * (5 + boostLevel * 2) + wire.offset;
-      const wx = pt.x + Math.cos(ang) * rad * 0.4;
-      const wy = pt.y + Math.sin(ang) * rad;
-      const wz = pt.z + Math.sin(ang) * rad;
-      const p = project3D(wx, wy, wz);
+      const p = project3D(
+        pt.x + Math.cos(ang) * rad * 0.35,
+        pt.y + Math.sin(ang) * rad,
+        pt.z + Math.sin(ang) * rad
+      );
       if (idx === 0) ctx.moveTo(p.px, p.py);
       else ctx.lineTo(p.px, p.py);
     });
     ctx.stroke();
   });
 
-  // Fagulhas / pulsos de energia disparando na ponta da tromba
-  const tip = trunkPoints[trunkPoints.length - 1];
-  const tipProj = project3D(tip.x, tip.y, tip.z);
-  const sparkCount = isMini ? 4 : 9;
-  for (let sp = 0; sp < sparkCount; sp++) {
-    const phase = ((t * (1.8 + boostLevel * 0.5) + sp / sparkCount) % 1 + 1) % 1;
-    const angle = sp * 0.75 + t * 2.2;
-    const dist = phase * (isMini ? 16 : 36);
-    const sx = tipProj.px + Math.cos(angle) * dist;
-    const sy = tipProj.py + Math.sin(angle) * dist * 0.7;
-
-    ctx.fillStyle = sp % 2 === 0 ? "#2dd4bf" : "#f59e0b";
+  // Pulsos de energia na extremidade da tromba
+  const tip = trunk[trunk.length - 1];
+  const tipP = project3D(tip.x, tip.y, tip.z);
+  const sparks = 6;
+  for (let i = 0; i < sparks; i++) {
+    const phase = ((t * (1.8 + boostLevel * 0.45) + i / sparks) % 1 + 1) % 1;
+    const ang = i * 1.05 + t * 2.4;
+    const dist = phase * unit * 0.42;
+    ctx.fillStyle = i % 2 === 0 ? "#2dd4bf" : "#f59e0b";
     ctx.beginPath();
-    ctx.arc(sx, sy, isMini ? 2 : 3.4, 0, Math.PI * 2);
+    ctx.arc(
+      tipP.px + Math.cos(ang) * dist,
+      tipP.py + Math.sin(ang) * dist * 0.75,
+      Math.max(1.6, size * 0.0085),
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
   }
 
-  if (!isMini) {
-    ctx.fillStyle = "#e2e8f0";
-    ctx.font = "600 11px monospace";
-    ctx.fillText(
-      `CERRO-GRADLE 3D // FIACAO ELETRICA NA TROMBA · BUILD & PIPELINE SE ENGENHARIA DE SOFTWARE`,
-      14,
-      18
-    );
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "11px monospace";
-    ctx.fillText(
-      `PULSO ACUSTICO HARMONICO · FASES 3F ATIVAS · TURBO=${boostLevel}x`,
-      14,
-      h - 14
-    );
-  }
+  ctx.restore();
 }
 
-function CerroGradleMediaCanvas({
+function CerroGradleIconCanvas({
   node,
-  mode,
   flowPulse,
-  soundEnabled,
-  isMini = false
+  showGuides,
+  sizePx
 }: {
   node: EngineeringGameNode;
-  mode: DeliveryMode;
   flowPulse: number;
-  soundEnabled: boolean;
-  isMini?: boolean;
+  showGuides: boolean;
+  sizePx: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isCerroGradle =
-    node.title.toLowerCase().includes("cerro-gradle") ||
-    node.discipline.toLowerCase().includes("software");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -323,91 +332,26 @@ function CerroGradleMediaCanvas({
 
     let rafId = 0;
     const start = performance.now() - flowPulse * 300;
-    const boostLevel = 1 + (flowPulse % 5) * 0.25 + (node.licenseActive ? 0.5 : 0);
+    const boost = 1 + (flowPulse % 5) * 0.25 + (node.licenseActive ? 0.5 : 0);
 
-    const renderLoop = (now: number) => {
-      const t = (now - start) / 1000;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      if (isCerroGradle) {
-        renderCerroGradle3D(ctx, w, h, t, boostLevel, isMini);
-      } else {
-        // Renderizacao tecnica padrao para demais engenharias no Deque
-        const bg = ctx.createLinearGradient(0, 0, w, h);
-        bg.addColorStop(0, "#050811");
-        bg.addColorStop(1, "#091222");
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
-        ctx.lineWidth = 1;
-        for (let x = 0; x <= w; x += 24) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, h);
-          ctx.stroke();
-        }
-
-        ctx.beginPath();
-        for (let x = 12; x < w - 12; x += 4) {
-          const u = x / Math.max(1, w - 24);
-          const y = h * 0.5 + Math.sin(u * Math.PI * 5 - t * 3) * (isMini ? 16 : 34);
-          if (x === 12) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = node.licenseActive ? "#2dd4bf" : "#38bdf8";
-        ctx.lineWidth = isMini ? 1.8 : 2.5;
-        ctx.stroke();
-
-        if (!isMini) {
-          ctx.fillStyle = "#e2e8f0";
-          ctx.font = "600 11px monospace";
-          ctx.fillText(
-            `${node.code} · ${node.discipline.toUpperCase()} · ${deliveryLabel(mode).toUpperCase()}`,
-            14,
-            18
-          );
-        }
-      }
-
-      rafId = requestAnimationFrame(renderLoop);
+    const loop = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      renderClosedAppIcon3D(ctx, canvas.width, elapsed, boost, showGuides);
+      rafId = requestAnimationFrame(loop);
     };
 
-    rafId = requestAnimationFrame(renderLoop);
+    rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [node, mode, flowPulse, isCerroGradle, isMini]);
+  }, [node, flowPulse, showGuides, sizePx]);
 
   return (
-    <div className="relative">
-      <canvas
-        ref={canvasRef}
-        width={isMini ? 320 : 760}
-        height={isMini ? 124 : 250}
-        className={
-          isMini
-            ? "h-30 w-full rounded-lg border border-slate-800 bg-slate-950"
-            : "h-60 w-full rounded-xl border border-slate-800 bg-slate-950"
-        }
-      />
-      {!isMini && (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
-          <span>
-            {isCerroGradle
-              ? "Visual 3D: Fiaca eletrica energizando a tromba do elefante em rotacao espacial."
-              : `Telemetria ativa em ${deliveryLabel(mode)}.`}
-          </span>
-          <button
-            type="button"
-            onClick={() => playAcousticPulse(isCerroGradle ? 264 : 220, 0.28)}
-            disabled={!soundEnabled}
-            className="rounded-md border border-teal-600/40 bg-teal-600/10 px-2.5 py-1 text-[11px] font-semibold text-teal-700 hover:bg-teal-600/20 disabled:opacity-40 dark:text-teal-300"
-          >
-            Disparar Pulso Acustico
-          </button>
-        </div>
-      )}
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={sizePx}
+      height={sizePx}
+      style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
+      className="mx-auto block rounded-2xl border border-slate-800 bg-slate-950 shadow-sm"
+    />
   );
 }
 
@@ -423,11 +367,12 @@ export default function EngineeringDequeStudio({
   const [customPrice, setCustomPrice] = useState("189.00");
   const [autoCirculate, setAutoCirculate] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showGuides, setShowGuides] = useState(true);
   const [flowPulse, setFlowPulse] = useState(0);
   const [lastMoveDir, setLastMoveDir] = useState<"left" | "right">("right");
   const [rawTab, setRawTab] = useState<"telemetry" | "json">("telemetry");
   const [eventLog, setEventLog] = useState<string[]>([
-    `[SSR ${serverRenderedAt}] Deque ativo com Cerro-Gradle 3D, fiacao eletrica na tromba e dados brutos.`
+    `[SSR ${serverRenderedAt}] Icone Cerro-Gradle em proporcao fechada (1:1, phi=1.618) ativo no Deque.`
   ]);
 
   const selectedNode = useMemo(
@@ -488,7 +433,7 @@ export default function EngineeringDequeStudio({
       title,
       discipline: customDiscipline,
       realWorldProblem:
-        "Pipeline de compilacao, entrega de pacotes em disco/nuvem e validacao de licenca em producao.",
+        "Pipeline de compilacao, entrega em disco/nuvem e validacao de licenca em producao.",
       stockUnits: 60,
       priceBrl: price,
       diskSizeGb: 21.4,
@@ -507,18 +452,18 @@ export default function EngineeringDequeStudio({
       rawSample: {
         sampleRateHz: 4800,
         primaryMetricLabel: "Throughput Build",
-        primaryMetricValue: "19.2k req/s",
+        primaryMetricValue: "21.6k req/s",
         secondaryMetricLabel: "Latencia P99",
-        secondaryMetricValue: "6.4 ms",
-        rawTelemetryFrame: `RAW|${code}|ENGINE=CERRO-GRADLE|BUS=3F_TURBO|HMAC=OK|CRC=7B91`,
+        secondaryMetricValue: "5.8 ms",
+        rawTelemetryFrame: `RAW|${code}|ICON=CERRO-GRADLE|PHI=1.618|TRUNK_BUS=3F|CRC=9E2C`,
         payloadJson: JSON.stringify(
           {
             module: title,
             code,
             discipline: customDiscipline,
+            iconRatio: "1:1_phi_1.618",
             delivery: activeDelivery,
-            licenseModel: "production_enterprise",
-            protocols: ["HMAC-SHA256", "STREAM-TOKEN", "CHUNK-SHA256", "LEASE-SYNC"]
+            licenseModel: "production_enterprise"
           },
           null,
           2
@@ -638,19 +583,30 @@ export default function EngineeringDequeStudio({
                 DEQUE (Double-Ended Queue)
               </span>
               <span className="rounded-md bg-sky-500/15 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:text-sky-300">
-                3D + FIACAO ELETRICA + ACUSTICA
+                ICONE FECHADO · PHI 1.618
               </span>
               <span className="text-xs text-zinc-500">SSR: {serverRenderedAt}</span>
             </div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Cerro-Gradle: Circulacao em Deque, Fiaca Eletrica 3D e Licenca SDLC para Engenharia de Software
+              Cerro-Gradle: Emblema em Proporcao Geometrica Fechada, Deque e Licenca SDLC
             </h1>
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Modelagem 3D com fiacao eletrica energizando a tromba, retorno acustico tecnico, dados brutos inspecionaveis e compra/download em Disco/Console, Nuvem ou Hibrido.
+              Visual fechado em proporcoes geometricas ideais de icone de aplicativo, com fiacao eletrica 3D na tromba, retorno acustico, dados brutos e licenca de producao.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowGuides((g) => !g)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                showGuides
+                  ? "border-teal-600 bg-teal-600/10 text-teal-700 dark:border-teal-400 dark:text-teal-300"
+                  : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {showGuides ? "Guias Geometricas: ON" : "Guias Geometricas: OFF"}
+            </button>
             <button
               type="button"
               onClick={() => setSoundEnabled((s) => !s)}
@@ -695,7 +651,7 @@ export default function EngineeringDequeStudio({
             type="text"
             value={customTitle}
             onChange={(e) => setCustomTitle(e.target.value)}
-            placeholder="Ex.: Cerro-Gradle Pipeline Core"
+            placeholder="Ex.: Cerro-Gradle Core"
             className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-950"
           />
           <select
@@ -732,7 +688,7 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Trilho visual em Deque */}
+      {/* Trilho Deque com icones fechados 1:1 */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold">
@@ -780,7 +736,7 @@ export default function EngineeringDequeStudio({
                     : "border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/60"
                 }`}
               >
-                <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="mb-2.5 flex items-center justify-between gap-2">
                   <span className="font-mono text-xs font-semibold text-zinc-500">
                     #{idx + 1} · {node.code}
                   </span>
@@ -798,16 +754,19 @@ export default function EngineeringDequeStudio({
                   </div>
                 </div>
 
-                <CerroGradleMediaCanvas
+                <CerroGradleIconCanvas
                   node={node}
-                  mode={node.deliveryMode}
                   flowPulse={flowPulse}
-                  soundEnabled={soundEnabled}
-                  isMini={true}
+                  showGuides={showGuides}
+                  sizePx={164}
                 />
 
-                <h2 className="mt-3 text-sm font-semibold leading-snug">{node.title}</h2>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">{node.realWorldProblem}</p>
+                <h2 className="mt-3 text-center text-sm font-semibold leading-snug">
+                  {node.title}
+                </h2>
+                <p className="mt-1 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  {node.discipline}
+                </p>
 
                 <div className="mt-3 flex items-center justify-between text-xs">
                   <span className="font-semibold tabular-nums">{formatBrl(node.priceBrl)}</span>
@@ -847,14 +806,14 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Bancada 3D + Compra/Download + Dados Brutos + Protocolos + Logs */}
+      {/* Bancada fechada de icone + Compra/Download + Dados Brutos + Protocolos + Logs */}
       {selectedNode && (
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="font-mono text-xs text-teal-700 dark:text-teal-400">
-                  BANCADA 3D &amp; ACUSTICA · {selectedNode.code} · {selectedNode.rawSample.sampleRateHz} Hz
+                  ICONE EM PROPORCAO FECHADA · {selectedNode.code} · PHI = 1.618
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -871,13 +830,27 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
-            <CerroGradleMediaCanvas
-              node={selectedNode}
-              mode={activeDelivery}
-              flowPulse={flowPulse}
-              soundEnabled={soundEnabled}
-              isMini={false}
-            />
+            <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+              <CerroGradleIconCanvas
+                node={selectedNode}
+                flowPulse={flowPulse}
+                showGuides={showGuides}
+                sizePx={240}
+              />
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => playAcousticPulse(264, 0.25)}
+                  disabled={!soundEnabled}
+                  className="rounded-md border border-teal-600/40 bg-teal-600/10 px-3 py-1 text-xs font-semibold text-teal-700 hover:bg-teal-600/20 disabled:opacity-40 dark:text-teal-300"
+                >
+                  Disparar Pulso Acustico
+                </button>
+                <span className="font-mono text-[11px] text-zinc-500">
+                  {selectedNode.rawSample.primaryMetricLabel}: {selectedNode.rawSample.primaryMetricValue} · {selectedNode.rawSample.secondaryMetricLabel}: {selectedNode.rawSample.secondaryMetricValue}
+                </span>
+              </div>
+            </div>
 
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
