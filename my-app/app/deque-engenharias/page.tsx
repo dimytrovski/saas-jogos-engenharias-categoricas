@@ -13,8 +13,9 @@ export default async function DequeEngenhariasPage() {
     {
       id: "eng-sim-01",
       code: "ENG-101",
-      title: "GridFlow 3D: Simulacao de Subestacoes",
+      title: "GridFlow 3D: Transientes em Subestacoes",
       discipline: "Engenharia Eletrica & Energia",
+      realWorldProblem: "Analise trifasica, faltas fase-terra e resposta de disjuntores em 60 Hz.",
       stockUnits: 120,
       priceBrl: 189.0,
       diskSizeGb: 24.6,
@@ -29,13 +30,34 @@ export default async function DequeEngenhariasPage() {
       },
       licenseActive: false,
       deliveryMode: "hibrido",
-      lastServerSync: serverRenderedAt
+      lastServerSync: serverRenderedAt,
+      rawSample: {
+        sampleRateHz: 4800,
+        primaryMetricLabel: "Tensao Linha",
+        primaryMetricValue: "138.4 kV",
+        secondaryMetricLabel: "Distorcao THD",
+        secondaryMetricValue: "1.82%",
+        rawTelemetryFrame: "RAW|ENG-101|VA=79.91kV|VB=79.88kV|VC=79.95kV|FREQ=60.01Hz|CRC=A84E",
+        payloadJson: JSON.stringify(
+          {
+            code: "ENG-101",
+            busKv: 138.4,
+            frequencyHz: 60.01,
+            thdPct: 1.82,
+            deliveryTargets: ["disk_console", "cloud_stream", "hybrid"],
+            licenseTier: "production_enterprise"
+          },
+          null,
+          2
+        )
+      }
     },
     {
       id: "eng-sim-02",
       code: "ENG-204",
-      title: "BridgeLoad Pro: Tensao & Resiliencia Estrutural",
+      title: "BridgeLoad Pro: Trelicas & Tensao Estrutural",
       discipline: "Engenharia Civil & Estrutural",
+      realWorldProblem: "Distribuicao de esforcos axiais, flambagem e flecha maxima sob carga movel.",
       stockUnits: 85,
       priceBrl: 159.0,
       diskSizeGb: 19.2,
@@ -50,13 +72,34 @@ export default async function DequeEngenhariasPage() {
       },
       licenseActive: true,
       deliveryMode: "disco_console",
-      lastServerSync: serverRenderedAt
+      lastServerSync: serverRenderedAt,
+      rawSample: {
+        sampleRateHz: 2000,
+        primaryMetricLabel: "Fator Seguranca",
+        primaryMetricValue: "2.45x",
+        secondaryMetricLabel: "Flecha Central",
+        secondaryMetricValue: "11.4 mm",
+        rawTelemetryFrame: "RAW|ENG-204|LOAD=420kN|SIGMA_MAX=164MPa|DEFLECT=11.4mm|CRC=7C19",
+        payloadJson: JSON.stringify(
+          {
+            code: "ENG-204",
+            appliedLoadKn: 420,
+            maxStressMpa: 164,
+            safetyFactor: 2.45,
+            deliveryTargets: ["disk_console", "cloud_stream", "hybrid"],
+            licenseTier: "production_enterprise"
+          },
+          null,
+          2
+        )
+      }
     },
     {
       id: "eng-sim-03",
       code: "ENG-309",
-      title: "PipeLineOps: Escoamento & Controle Industrial",
+      title: "PipeLineOps: Escoamento & Malha PID",
       discipline: "Engenharia Mecanica & Controle",
+      realWorldProblem: "Controle de pressao, numero de Reynolds e amortecimento de golpe de ariete.",
       stockUnits: 64,
       priceBrl: 219.0,
       diskSizeGb: 28.0,
@@ -71,13 +114,34 @@ export default async function DequeEngenhariasPage() {
       },
       licenseActive: false,
       deliveryMode: "streaming_nuvem",
-      lastServerSync: serverRenderedAt
+      lastServerSync: serverRenderedAt,
+      rawSample: {
+        sampleRateHz: 1000,
+        primaryMetricLabel: "Vazao Volumetrica",
+        primaryMetricValue: "312.8 m3/h",
+        secondaryMetricLabel: "Pressao Linha",
+        secondaryMetricValue: "14.6 bar",
+        rawTelemetryFrame: "RAW|ENG-309|Q=312.8m3h|P=14.6bar|RE=1.48e5|PID_OUT=68.2%|CRC=5E02",
+        payloadJson: JSON.stringify(
+          {
+            code: "ENG-309",
+            flowRateM3h: 312.8,
+            linePressureBar: 14.6,
+            reynoldsNumber: 148000,
+            deliveryTargets: ["disk_console", "cloud_stream", "hybrid"],
+            licenseTier: "production_enterprise"
+          },
+          null,
+          2
+        )
+      }
     },
     {
       id: "eng-sim-04",
       code: "ENG-412",
-      title: "CloudScale Lab: Distribuicao & Telemetria",
+      title: "CloudScale Lab: Telemetria & Malha Distribuida",
       discipline: "Engenharia de Software & Nuvem",
+      realWorldProblem: "Consistencia de sessoes, vazao de pacotes e validacao criptografica em escala.",
       stockUnits: 200,
       priceBrl: 129.0,
       diskSizeGb: 12.8,
@@ -92,7 +156,27 @@ export default async function DequeEngenhariasPage() {
       },
       licenseActive: true,
       deliveryMode: "hibrido",
-      lastServerSync: serverRenderedAt
+      lastServerSync: serverRenderedAt,
+      rawSample: {
+        sampleRateHz: 5000,
+        primaryMetricLabel: "Throughput",
+        primaryMetricValue: "18.4k req/s",
+        secondaryMetricLabel: "P99 Latencia",
+        secondaryMetricValue: "9.8 ms",
+        rawTelemetryFrame: "RAW|ENG-412|RPS=18420|P99=9.8ms|IDEMPOTENCY=OK|HMAC=VERIFIED|CRC=3D8B",
+        payloadJson: JSON.stringify(
+          {
+            code: "ENG-412",
+            throughputRps: 18420,
+            p99LatencyMs: 9.8,
+            idempotencyKey: "eventId",
+            deliveryTargets: ["disk_console", "cloud_stream", "hybrid"],
+            licenseTier: "production_enterprise"
+          },
+          null,
+          2
+        )
+      }
     }
   ];
 

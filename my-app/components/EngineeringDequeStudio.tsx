@@ -9,11 +9,22 @@ export type SdlcStage =
   | "Verificacao de Protocolos"
   | "Licenca Ativa em Producao";
 
+export interface RawEngineeringSample {
+  sampleRateHz: number;
+  primaryMetricLabel: string;
+  primaryMetricValue: string;
+  secondaryMetricLabel: string;
+  secondaryMetricValue: string;
+  rawTelemetryFrame: string;
+  payloadJson: string;
+}
+
 export interface EngineeringGameNode {
   id: string;
   code: string;
   title: string;
   discipline: string;
+  realWorldProblem: string;
   stockUnits: number;
   priceBrl: number;
   diskSizeGb: number;
@@ -29,6 +40,7 @@ export interface EngineeringGameNode {
   licenseActive: boolean;
   deliveryMode: DeliveryMode;
   lastServerSync: string;
+  rawSample: RawEngineeringSample;
 }
 
 interface EngineeringDequeStudioProps {
@@ -56,71 +68,201 @@ function deliveryLabel(mode: DeliveryMode) {
   return "Hibrido (Disco + Nuvem)";
 }
 
-function EngineeringVisualThumb({ discipline }: { discipline: string }) {
-  const lower = discipline.toLowerCase();
+function renderMediaArt(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  node: EngineeringGameNode,
+  mode: DeliveryMode,
+  t: number,
+  isMini: boolean
+) {
+  const lower = node.discipline.toLowerCase();
 
-  if (lower.includes("eletrica") || lower.includes("energia") || lower.includes("rede")) {
-    return (
-      <svg viewBox="0 0 240 96" className="h-24 w-full rounded-lg bg-slate-950 p-2 text-teal-400">
-        <rect x="12" y="16" width="52" height="64" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
-        <rect x="94" y="24" width="52" height="48" rx="6" fill="none" stroke="#38bdf8" strokeWidth="1.5" />
-        <rect x="176" y="16" width="52" height="64" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
-        <path d="M64 48 H94 M146 48 H176" stroke="#2dd4bf" strokeWidth="2" strokeDasharray="4 3" />
-        <circle cx="120" cy="48" r="10" fill="none" stroke="#f59e0b" strokeWidth="1.5" />
-        <text x="120" y="86" textAnchor="middle" fill="#94a3b8" fontSize="8" fontFamily="monospace">
-          SUBESTACAO &amp; CARGA 3F
-        </text>
-      </svg>
-    );
+  // Fundo escuro de instrumentacao tecnica com gradiente sutil
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, "#050811");
+  bg.addColorStop(0.55, "#091120");
+  bg.addColorStop(1, "#060a14");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // Malha de engenharia de precisao
+  const step = isMini ? 16 : 24;
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= w; x += step) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= h; y += step) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
   }
 
-  if (lower.includes("civil") || lower.includes("estrutural")) {
-    return (
-      <svg viewBox="0 0 240 96" className="h-24 w-full rounded-lg bg-slate-950 p-2 text-sky-400">
-        <line x1="16" y1="68" x2="224" y2="68" stroke="#475569" strokeWidth="2" />
-        <path d="M24 68 L68 28 L120 56 L172 28 L216 68" fill="none" stroke="currentColor" strokeWidth="2" />
-        <path d="M68 28 L68 68 M120 56 L120 68 M172 28 L172 68" stroke="#2dd4bf" strokeWidth="1.5" strokeDasharray="3 2" />
-        <text x="120" y="86" textAnchor="middle" fill="#94a3b8" fontSize="8" fontFamily="monospace">
-          TRELICA &amp; TENSAO ESTRUTURAL
-        </text>
-      </svg>
-    );
+  // Arte eletronica especifica por dominio de engenharia
+  if (lower.includes("eletrica") || lower.includes("energia")) {
+    const baseY = h * 0.56;
+    const amp = isMini ? 14 : 30;
+    // Tres fases senoidais defasadas (120 graus)
+    const phases = [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3];
+    const colors = ["#2dd4bf", "#38bdf8", "#f59e0b"];
+
+    phases.forEach((ph, idx) => {
+      ctx.beginPath();
+      for (let x = 8; x < w - 8; x += 3) {
+        const norm = x / Math.max(1, w - 16);
+        const y =
+          baseY +
+          Math.sin(norm * Math.PI * (isMini ? 3 : 5) - t * 2.4 + ph) * amp * Math.sin(norm * Math.PI);
+        if (x === 8) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = colors[idx];
+      ctx.lineWidth = isMini ? 1.5 : 2.2;
+      ctx.stroke();
+    });
+
+    // Barramento e pico de transiente
+    const pulseX = 16 + (((Math.sin(t * 1.5) + 1) / 2) * Math.max(1, w - 32));
+    ctx.fillStyle = "rgba(45, 212, 191, 0.16)";
+    ctx.beginPath();
+    ctx.arc(pulseX, baseY, isMini ? 6 : 12, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (lower.includes("civil") || lower.includes("estrutural")) {
+    // Trelica estrutural sob carga dinamica e mapa de tensao
+    const padX = isMini ? 14 : 36;
+    const topY = isMini ? 22 : 44;
+    const botY = isMini ? h - 22 : h - 42;
+    const bays = isMini ? 4 : 6;
+    const span = (w - padX * 2) / bays;
+    const deflection = Math.sin(t * 2.0) * (isMini ? 3 : 8);
+
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = isMini ? 1.5 : 2.5;
+    ctx.beginPath();
+    ctx.moveTo(padX, botY);
+    ctx.lineTo(w - padX, botY);
+    ctx.stroke();
+
+    for (let i = 0; i < bays; i++) {
+      const x1 = padX + i * span;
+      const x2 = x1 + span;
+      const midX = (x1 + x2) / 2;
+      const midY = topY + deflection * Math.sin(((i + 0.5) / bays) * Math.PI);
+
+      ctx.strokeStyle = i % 2 === 0 ? "#38bdf8" : "#2dd4bf";
+      ctx.lineWidth = isMini ? 1.5 : 2;
+      ctx.beginPath();
+      ctx.moveTo(x1, botY);
+      ctx.lineTo(midX, midY);
+      ctx.lineTo(x2, botY);
+      ctx.lineTo(midX, midY);
+      ctx.stroke();
+
+      // Vetor de carga vertical
+      ctx.strokeStyle = "#f59e0b";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(midX, Math.max(8, midY - (isMini ? 8 : 16)));
+      ctx.lineTo(midX, midY);
+      ctx.stroke();
+    }
+  } else if (lower.includes("mecanica") || lower.includes("controle")) {
+    // Escoamento turbulento em duto + malha de controle
+    const ductTop = isMini ? 24 : 46;
+    const ductBot = isMini ? h - 24 : h - 46;
+    const midY = (ductTop + ductBot) / 2;
+
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
+    ctx.lineWidth = isMini ? 1.5 : 2;
+    ctx.strokeRect(12, ductTop, Math.max(20, w - 24), Math.max(16, ductBot - ductTop));
+
+    const particles = isMini ? 10 : 22;
+    for (let i = 0; i < particles; i++) {
+      const u = ((t * 0.28 + i / particles) % 1 + 1) % 1;
+      const px = 16 + u * Math.max(10, w - 32);
+      const py =
+        midY +
+        Math.sin(u * Math.PI * 6 + t * 3 + i) * ((ductBot - ductTop) * 0.28);
+      ctx.fillStyle = i % 3 === 0 ? "#f59e0b" : "#2dd4bf";
+      ctx.beginPath();
+      ctx.arc(px, py, isMini ? 2 : 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else {
+    // Malha distribuida de telemetria / nuvem / disco / streaming
+    const cols = isMini ? 4 : 7;
+    const rows = isMini ? 2 : 3;
+    const gx = (w - 32) / Math.max(1, cols - 1);
+    const gy = (h - 44) / Math.max(1, rows - 1);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx = 16 + c * gx;
+        const cy = 24 + r * gy;
+        const active = ((Math.floor(t * 3 + r + c)) % 5) === 0;
+
+        if (c < cols - 1) {
+          ctx.strokeStyle = active ? "rgba(45, 212, 191, 0.55)" : "rgba(56, 189, 248, 0.18)";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + gx, cy);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = active ? "#2dd4bf" : "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(cx, cy, isMini ? 2.5 : 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
 
-  if (lower.includes("mecanica") || lower.includes("controle")) {
-    return (
-      <svg viewBox="0 0 240 96" className="h-24 w-full rounded-lg bg-slate-950 p-2 text-emerald-400">
-        <rect x="18" y="38" width="204" height="20" rx="10" fill="none" stroke="#334155" strokeWidth="2" />
-        <path d="M24 48 Q60 22 96 48 T168 48 T216 48" fill="none" stroke="currentColor" strokeWidth="2" />
-        <circle cx="120" cy="48" r="7" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
-        <text x="120" y="86" textAnchor="middle" fill="#94a3b8" fontSize="8" fontFamily="monospace">
-          ESCOAMENTO &amp; MALHA PID
-        </text>
-      </svg>
-    );
+  // Pacotes de entrega (Disco / Nuvem / Hibrido)
+  const packetCount = mode === "hibrido" ? (isMini ? 4 : 8) : (isMini ? 2 : 5);
+  for (let p = 0; p < packetCount; p++) {
+    const prog = ((t * 0.22 + p / packetCount) % 1 + 1) % 1;
+    const px = 12 + prog * Math.max(10, w - 24);
+    const py = h - (isMini ? 10 : 18);
+    ctx.fillStyle = p % 2 === 0 ? "#2dd4bf" : "#38bdf8";
+    ctx.fillRect(px - 3, py - 2, 6, 4);
   }
 
-  return (
-    <svg viewBox="0 0 240 96" className="h-24 w-full rounded-lg bg-slate-950 p-2 text-teal-400">
-      <rect x="24" y="20" width="56" height="52" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="92" y="20" width="56" height="52" rx="6" fill="none" stroke="#38bdf8" strokeWidth="1.5" />
-      <rect x="160" y="20" width="56" height="52" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M80 46 H92 M148 46 H160" stroke="#f59e0b" strokeWidth="2" />
-      <text x="120" y="86" textAnchor="middle" fill="#94a3b8" fontSize="8" fontFamily="monospace">
-        TELEMETRIA &amp; NUVEM DISTRIBUIDA
-      </text>
-    </svg>
-  );
+  if (!isMini) {
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "600 11px monospace";
+    ctx.fillText(
+      `${node.code} · ${node.discipline.toUpperCase()} · ${deliveryLabel(mode).toUpperCase()}`,
+      14,
+      18
+    );
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "11px monospace";
+    ctx.fillText(
+      `${node.rawSample.primaryMetricLabel}: ${node.rawSample.primaryMetricValue} | ${node.rawSample.secondaryMetricLabel}: ${node.rawSample.secondaryMetricValue} | SDLC ${node.sdlcProgress}%`,
+      14,
+      h - 28
+    );
+  }
 }
 
-function SampleStreamCanvas({
+function EngineeringMediaCanvas({
   node,
   mode,
-  flowPulse
+  flowPulse,
+  isMini = false
 }: {
   node: EngineeringGameNode;
   mode: DeliveryMode;
   flowPulse: number;
+  isMini?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -130,97 +272,29 @@ function SampleStreamCanvas({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animId = 0;
-    let phase = flowPulse * 0.4;
+    let rafId = 0;
+    let start = performance.now() - flowPulse * 350;
 
-    const renderFrame = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-      phase += 0.045;
-
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#090d16";
-      ctx.fillRect(0, 0, w, h);
-
-      // Grade tecnica de fundo
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.10)";
-      ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 24) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
-      }
-      for (let y = 0; y < h; y += 24) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-
-      // Onda de simulacao / sinal do modulo
-      ctx.beginPath();
-      for (let x = 16; x < w - 16; x += 4) {
-        const norm = (x - 16) / (w - 32);
-        const wave =
-          Math.sin(norm * Math.PI * 4 - phase) * 24 +
-          Math.cos(norm * Math.PI * 2 + phase * 0.6) * 10;
-        const y = h * 0.52 + wave;
-        if (x === 16) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = node.licenseActive ? "#2dd4bf" : "#38bdf8";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      // Pacotes circulando da origem (Servidor/Deque) para o destino (Disco/Nuvem)
-      const packetCount = mode === "hibrido" ? 6 : 4;
-      for (let i = 0; i < packetCount; i++) {
-        const progress = ((phase * 0.14 + i / packetCount) % 1 + 1) % 1;
-        const px = 28 + progress * (w - 56);
-        const py =
-          h * 0.52 +
-          Math.sin(progress * Math.PI * 4 - phase) * 24 +
-          Math.cos(progress * Math.PI * 2 + phase * 0.6) * 10;
-
-        ctx.beginPath();
-        ctx.arc(px, py, 5, 0, Math.PI * 2);
-        ctx.fillStyle = i % 2 === 0 ? "#2dd4bf" : "#f59e0b";
-        ctx.fill();
-      }
-
-      // Cabecalho de telemetria dentro da amostra
-      ctx.fillStyle = "#e2e8f0";
-      ctx.font = "600 12px monospace";
-      ctx.fillText(
-        `AMOSTRA AO VIVO // ${node.code} · ${deliveryLabel(mode).toUpperCase()}`,
-        16,
-        22
-      );
-
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "11px monospace";
-      ctx.fillText(
-        `SDLC ${node.sdlcProgress}% (${node.sdlcStage}) · LICENCA: ${
-          node.licenseActive ? "ATIVA PRODUCAO" : "PENDENTE"
-        }`,
-        16,
-        h - 14
-      );
-
-      animId = requestAnimationFrame(renderFrame);
+    const tick = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      renderMediaArt(ctx, canvas.width, canvas.height, node, mode, elapsed, isMini);
+      rafId = requestAnimationFrame(tick);
     };
 
-    animId = requestAnimationFrame(renderFrame);
-    return () => cancelAnimationFrame(animId);
-  }, [node, mode, flowPulse]);
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [node, mode, flowPulse, isMini]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={640}
-      height={190}
-      className="h-44 w-full rounded-xl border border-slate-800 bg-slate-950"
+      width={isMini ? 320 : 760}
+      height={isMini ? 116 : 240}
+      className={
+        isMini
+          ? "h-28 w-full rounded-lg border border-slate-800 bg-slate-950"
+          : "h-56 w-full rounded-xl border border-slate-800 bg-slate-950"
+      }
     />
   );
 }
@@ -234,12 +308,13 @@ export default function EngineeringDequeStudio({
   const [activeDelivery, setActiveDelivery] = useState<DeliveryMode>("hibrido");
   const [customTitle, setCustomTitle] = useState("");
   const [customDiscipline, setCustomDiscipline] = useState("Engenharia de Controle");
-  const [customPrice, setCustomPrice] = useState("149.90");
+  const [customPrice, setCustomPrice] = useState("189.00");
   const [autoCirculate, setAutoCirculate] = useState(true);
   const [flowPulse, setFlowPulse] = useState(0);
   const [lastMoveDir, setLastMoveDir] = useState<"left" | "right">("right");
+  const [rawTab, setRawTab] = useState<"telemetry" | "json">("telemetry");
   const [eventLog, setEventLog] = useState<string[]>([
-    `[SSR ${serverRenderedAt}] Deque ativo com ${initialDeque.length} modulos de Engenharia e telemetria visual.`
+    `[SSR ${serverRenderedAt}] Deque carregado com ${initialDeque.length} modulos de Engenharia e dados brutos.`
   ]);
 
   const selectedNode = useMemo(
@@ -249,7 +324,7 @@ export default function EngineeringDequeStudio({
 
   const pushLog = (msg: string) => {
     const now = new Date().toLocaleTimeString("pt-BR");
-    setEventLog((prev) => [`[${now}] ${msg}`, ...prev.slice(0, 11)]);
+    setEventLog((prev) => [`[${now}] ${msg}`, ...prev.slice(0, 12)]);
   };
 
   const rotateDeque = (direction: "front_to_rear" | "rear_to_front", silent = false) => {
@@ -276,18 +351,17 @@ export default function EngineeringDequeStudio({
     }
   };
 
-  // Circulacao continua fluida no Deque quando habilitada
   useEffect(() => {
     if (!autoCirculate || deque.length <= 1) return;
     const timer = setInterval(() => {
       rotateDeque("front_to_rear", true);
-    }, 3600);
+    }, 3800);
     return () => clearInterval(timer);
   }, [autoCirculate, deque.length]);
 
   const insertNode = (end: "front" | "rear") => {
-    const title = customTitle.trim() || `Simulador ${customDiscipline} v2.4`;
-    const price = Math.max(19.9, Number(customPrice) || 149.9);
+    const title = customTitle.trim() || `Planta Piloto ${customDiscipline} v3.1`;
+    const price = Math.max(29.0, Number(customPrice) || 189.0);
     const id = `eng-${Date.now().toString(36)}`;
     const code = `ENG-${Math.floor(100 + Math.random() * 899)}`;
 
@@ -296,12 +370,14 @@ export default function EngineeringDequeStudio({
       code,
       title,
       discipline: customDiscipline,
-      stockUnits: 45,
+      realWorldProblem:
+        "Estabilidade dinamica, resposta em malha fechada e integridade de pacotes sob carga real.",
+      stockUnits: 60,
       priceBrl: price,
-      diskSizeGb: 18.4,
-      cloudBitrateMbps: 14.5,
-      sdlcProgress: 25,
-      sdlcStage: "Planejamento & Escopo",
+      diskSizeGb: 21.4,
+      cloudBitrateMbps: 16.5,
+      sdlcProgress: 50,
+      sdlcStage: "Build & Empacotamento",
       protocols: {
         hmacWebhook: true,
         streamTokenGating: true,
@@ -310,7 +386,26 @@ export default function EngineeringDequeStudio({
       },
       licenseActive: false,
       deliveryMode: activeDelivery,
-      lastServerSync: new Date().toLocaleTimeString("pt-BR")
+      lastServerSync: new Date().toLocaleTimeString("pt-BR"),
+      rawSample: {
+        sampleRateHz: 1000,
+        primaryMetricLabel: "Variavel Processo",
+        primaryMetricValue: "98.42%",
+        secondaryMetricLabel: "Latencia Loop",
+        secondaryMetricValue: "4.2 ms",
+        rawTelemetryFrame: `FRM|${code}|TS=${Date.now()}|V=230.4|I=18.7|CRC=0x9F4A`,
+        payloadJson: JSON.stringify(
+          {
+            moduleCode: code,
+            discipline: customDiscipline,
+            delivery: activeDelivery,
+            licenseModel: "production_perpetual_lease",
+            protocols: ["HMAC-SHA256", "STREAM-TOKEN", "CHUNK-SHA256", "LEASE-SYNC"]
+          },
+          null,
+          2
+        )
+      }
     };
 
     setFlowPulse((p) => p + 1);
@@ -413,7 +508,7 @@ export default function EngineeringDequeStudio({
 
   return (
     <div className="space-y-6">
-      {/* Barra superior de controle */}
+      {/* Cabecalho e controle do Deque */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
@@ -422,17 +517,18 @@ export default function EngineeringDequeStudio({
                 SSR DINAMICO
               </span>
               <span className="rounded-md bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                Estrutura: DEQUE (Double-Ended Queue)
+                DEQUE (Double-Ended Queue)
               </span>
-              <span className="text-xs text-zinc-500">
-                Renderizado no servidor: {serverRenderedAt}
+              <span className="rounded-md bg-sky-500/15 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:text-sky-300">
+                DADOS BRUTOS &amp; ARTE DE MIDIA
               </span>
+              <span className="text-xs text-zinc-500">SSR: {serverRenderedAt}</span>
             </div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Circulacao em Deque de Jogos de Engenharia, Estoque e Licenca SDLC
+              Laboratorio de Circulacao em Deque: Simuladores de Engenharia, Estoque e Licenca SDLC
             </h1>
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Compre do estoque nos servidores e baixe em Disco/Console, Streaming em Nuvem ou Hibrido com licenca de producao monitorada pelo SDLC.
+              Cada modulo circula entre FRONT e REAR, exibe arte tecnica animada do problema real de engenharia, expoe dados brutos e permite compra/download em Disco/Console, Streaming em Nuvem ou Hibrido com licenca de producao.
             </p>
           </div>
 
@@ -509,7 +605,7 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Trilho visual do Deque com diagramas SVG e circulacao */}
+      {/* Trilho visual do Deque */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold">
@@ -517,7 +613,7 @@ export default function EngineeringDequeStudio({
               FRONT
             </span>
             <span className="text-zinc-500">
-              Circulacao Bidirecional ({deque.length} nos · sentido {lastMoveDir === "right" ? "FRONT -> REAR" : "REAR -> FRONT"})
+              Deque Bidirecional ({deque.length} nos · {lastMoveDir === "right" ? "FRONT -> REAR" : "REAR -> FRONT"})
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -551,13 +647,13 @@ export default function EngineeringDequeStudio({
               <div
                 key={`${node.id}-${idx}`}
                 onClick={() => setSelectedId(node.id)}
-                className={`cursor-pointer rounded-xl border p-4 transition-all duration-300 ${
+                className={`cursor-pointer rounded-xl border p-4 transition-all ${
                   isSelected
                     ? "border-teal-600 bg-teal-50/30 ring-2 ring-teal-600/30 dark:border-teal-400 dark:bg-teal-950/20"
-                    : "border-zinc-200 bg-zinc-50/70 hover:-translate-y-0.5 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/60"
+                    : "border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/60"
                 }`}
               >
-                <div className="mb-2.5 flex items-center justify-between gap-2">
+                <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="font-mono text-xs font-semibold text-zinc-500">
                     #{idx + 1} · {node.code}
                   </span>
@@ -575,10 +671,15 @@ export default function EngineeringDequeStudio({
                   </div>
                 </div>
 
-                <EngineeringVisualThumb discipline={node.discipline} />
+                <EngineeringMediaCanvas
+                  node={node}
+                  mode={node.deliveryMode}
+                  flowPulse={flowPulse}
+                  isMini={true}
+                />
 
                 <h2 className="mt-3 text-sm font-semibold leading-snug">{node.title}</h2>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">{node.discipline}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{node.realWorldProblem}</p>
 
                 <div className="mt-3 flex items-center justify-between text-xs">
                   <span className="font-semibold tabular-nums">{formatBrl(node.priceBrl)}</span>
@@ -618,18 +719,18 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Amostra visual animada + Compra/Download + SDLC + Protocolos + Logs */}
+      {/* Bancada tecnica: Arte de Midia + Compra/Download + Dados Brutos + Protocolos */}
       {selectedNode && (
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="font-mono text-xs text-teal-700 dark:text-teal-400">
-                  AMOSTRA DO MODULO SELECIONADO · {selectedNode.code}
+                  BANCADA DE DEMONSTRACAO · {selectedNode.code} · {selectedNode.rawSample.sampleRateHz} Hz
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Disco/Console: {selectedNode.diskSizeGb} GB · Streaming Nuvem: {selectedNode.cloudBitrateMbps} Mbps · Sincronia: {selectedNode.lastServerSync}
+                  {selectedNode.realWorldProblem} · Disco/Console: {selectedNode.diskSizeGb} GB · Nuvem: {selectedNode.cloudBitrateMbps} Mbps
                 </p>
               </div>
               <div className="text-right">
@@ -637,20 +738,22 @@ export default function EngineeringDequeStudio({
                   {formatBrl(selectedNode.priceBrl)}
                 </div>
                 <div className="text-xs text-zinc-500">
-                  Estoque no servidor: {selectedNode.stockUnits}
+                  Unidades em estoque: {selectedNode.stockUnits}
                 </div>
               </div>
             </div>
 
-            <SampleStreamCanvas
+            <EngineeringMediaCanvas
               node={selectedNode}
               mode={activeDelivery}
               flowPulse={flowPulse}
+              isMini={false}
             />
 
+            {/* Compra e download */}
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Modalidade de Download &amp; Garantia de Licenca em Producao:
+                Comprar do Estoque do Servidor, Baixar e Garantir Licenca em Producao:
               </div>
               <div className="mb-3 flex flex-wrap gap-2">
                 {(["disco_console", "streaming_nuvem", "hibrido"] as DeliveryMode[]).map(
@@ -689,6 +792,46 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
+            {/* Dados brutos para recursos tecnicos */}
+            <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Dados Brutos de Engenharia &amp; Telemetria:
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setRawTab("telemetry")}
+                    className={`rounded px-2 py-1 text-[11px] font-medium ${
+                      rawTab === "telemetry"
+                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
+                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                    }`}
+                  >
+                    Frame Bruto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRawTab("json")}
+                    className={`rounded px-2 py-1 text-[11px] font-medium ${
+                      rawTab === "json"
+                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
+                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                    }`}
+                  >
+                    Payload JSON
+                  </button>
+                </div>
+              </div>
+
+              <pre className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] text-teal-300">
+                {rawTab === "telemetry"
+                  ? `${selectedNode.rawSample.rawTelemetryFrame}\nDELIVERY=${activeDelivery.toUpperCase()} | LICENSE=${selectedNode.licenseActive ? "ACTIVE_PROD" : "PENDING"} | SDLC=${selectedNode.sdlcProgress}%`
+                  : selectedNode.rawSample.payloadJson}
+              </pre>
+            </div>
+
+            {/* Protocolos auxiliares */}
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Protocolos Auxiliares (Clique para validar ou inspecionar):
@@ -730,7 +873,7 @@ export default function EngineeringDequeStudio({
             <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
               Registro em tempo real da circulacao, compras e protocolos.
             </p>
-            <div className="mt-3 max-h-96 space-y-2 overflow-y-auto pr-1 font-mono text-[11px]">
+            <div className="mt-3 max-h-120 space-y-2 overflow-y-auto pr-1 font-mono text-[11px]">
               {eventLog.map((entry, i) => (
                 <div
                   key={i}
