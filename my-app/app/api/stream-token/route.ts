@@ -1,95 +1,87 @@
-﻿import { validateLivePassAccess } from "@/lib/live-pass-guard";
-import { enforceResourceCreation } from "@/lib/scale-enforcement";
-import crypto from "crypto";
+﻿import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { enforceResourceCreation } from "@/lib/scale-enforcement";
+import { validateLivePassAccess } from "@/lib/live-pass-guard";
 
-const SECRET = process.env.STREAM_SIGNING_SECRET || "dev-secret-change-in-production";
-const HLS_BASE_URL = process.env.NEXT_PUBLIC_HLS_BASE_URL || "https://localhost/hls";
-
-function signPayload(payloadB64: string): string {
-  return crypto.createHmac("sha256", SECRET).update(payloadB64).digest("base64url");
-}
+const HLS_BASE_URL = process.env.HLS_BASE_URL || "http://localhost:8080/hls";
+const STREAM_TOKEN_SECRET = process.env.STREAM_TOKEN_SECRET || "dev_stream_token_secret";
 
 export async function POST(req: NextRequest) {
   try {
-    const __reqBody = await req.clone().json().catch(() => ({}));
-    const __passCode = String((typeof __reqBody !== "undefined" ? (__reqBody as { passCode?: string })?.passCode : "") || "").trim();
-    if (__passCode) {
-      const __passCheck = await validateLivePassAccess(__passCode);
-      if (!__passCheck.allowed) {
+    const body = await req.json().catch(() => ({}));
+
+    const passCode = String(
+      (body as { passCode?: string; pass_code?: string } | undefined)?.passCode ||
+        (body as { passCode?: string; pass_code?: string } | undefined)?.pass_code ||
+        ""
+    ).trim();
+
+    if (passCode) {
+      const passCheck = await validateLivePassAccess(passCode);
+      if (!passCheck.allowed) {
         return NextResponse.json(
-          { ok: false, allowed: false, code: __passCheck.code, error: __passCheck.error },
-          { status: __passCheck.httpStatus || 403 }
+          {
+            ok: false,
+            allowed: false,
+            code: passCheck.code || "PASS_DENIED",
+            error: passCheck.error || "Acesso ao passe negado."
+          },
+          { status: passCheck.httpStatus || 403 }
         );
       }
     }
 
-    }
+    const organizationId =
+      typeof (body as { organizationId?: unknown })?.organizationId === "number"
+        ? (body as { organizationId: number }).organizationId
+        : null;
+    const actorEmail = (body as { actorEmail?: unknown })?.actorEmail
+      ? String((body as { actorEmail: unknown }).actorEmail).trim()
+      : null;
 
-    const __scaleGuard = await enforceResourceCreation({ resourceType: "stream" });
-    if (!__scaleGuard.allowed) {
+    const scaleGuard = await enforceResourceCreation({
+      organizationId,
+      resourceType: "stream",
+      actorEmail
+    });
+
+    if (!scaleGuard.allowed) {
       return NextResponse.json(
-        { ok: false, allowed: false, code: __scaleGuard.code, error: __scaleGuard.reason },
-        { status: __scaleGuard.httpStatus }
+        {
+          ok: false,
+          allowed: false,
+          code: scaleGuard.code,
+          error: scaleGuard.reason,
+          capacity: "capacity" in scaleGuard ? scaleGuard.capacity : undefined
+        },
+        { status: scaleGuard.httpStatus || 409 }
       );
     }
 
-    const body = await req.json().catch(() => ({}));
-    const streamKey = typeof body.streamKey === "string" && body.streamKey.trim()
-      ? body.streamKey.trim().replace(/[^a-zA-Z0-9_-]/g, "")
-      : "teste";
-
-    const exp = Date.now() + 5 * 60 * 1000; // válido por 5 minutos
-    const payload = { streamKey, exp };
-    const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
-    const sig = signPayload(payloadB64);
-    const token = `${payloadB64}.${sig}`;
+    const rawStreamKey = String(
+      (body as { streamKey?: string; stream_key?: string } | undefined)?.streamKey ||
+        (body as { streamKey?: string; stream_key?: string } | undefined)?.stream_key ||
+        "live_default"
+    ).trim();
+    const streamKey = rawStreamKey.replace(/[^a-zA-Z0-9_-]/g, "_") || "live_default";
+    const expiresAt = Date.now() + 1000 * 60 * 60;
+    const payload = `${streamKey}:${expiresAt}`;
+    const signature = crypto
+      .createHmac("sha256", STREAM_TOKEN_SECRET)
+      .update(payload)
+      .digest("hex");
+    const token = Buffer.from(`${payload}:${signature}`, "utf8").toString("base64url");
 
     return NextResponse.json({
+      ok: true,
+      allowed: true,
+      streamKey,
       token,
-      expiresAt: exp,
-      manifestUrl: `${HLS_BASE_URL}/${streamKey}.m3u8`,
+      expiresAt,
+      manifestUrl: `${HLS_BASE_URL}/${streamKey}.m3u8`
     });
-  } catch {
-    return NextResponse.json({ error: "Erro ao gerar token de acesso." }, { status: 400 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erro ao gerar token de acesso.";
+    return NextResponse.json({ ok: false, error: msg }, { status: 400 });
   }
 }
-
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token") || "";
-  const parts = token.split(".");
-  if (parts.length !== 2) {
-    return NextResponse.json({ valid: false, reason: "Token malformado." }, { status: 401 });
-  }
-
-  const [payloadB64, sig] = parts;
-  const expectedSig = signPayload(payloadB64);
-  const sigBuf = Buffer.from(sig);
-  const expBuf = Buffer.from(expectedSig);
-
-  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
-    return NextResponse.json({ valid: false, reason: "Assinatura inválida." }, { status: 401 });
-  }
-
-  try {
-    const parsed = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8")) as {
-      streamKey?: string;
-      exp?: number;
-    };
-
-    if (!parsed.exp || Date.now() > parsed.exp) {
-      return NextResponse.json({ valid: false, reason: "Token expirado." }, { status: 401 });
-    }
-
-    return NextResponse.json({
-      valid: true,
-      streamKey: parsed.streamKey || "teste",
-      expiresAt: parsed.exp,
-    });
-  } catch {
-    return NextResponse.json({ valid: false, reason: "Payload inválido." }, { status: 401 });
-  }
-}
-
-
-
