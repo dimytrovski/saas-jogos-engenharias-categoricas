@@ -37,3 +37,14 @@ export function getPool(): mysql.Pool {
   }
   return pool;
 }
+
+export async function getDbPool() {
+  if (typeof getPool === "function") {
+    return await getPool();
+  }
+  const { getDigestPool } = await import("./digest-db");
+  return await getDigestPool();
+}
+
+export default getDbConfig;
+

@@ -1,4 +1,6 @@
-﻿import crypto from "crypto";
+﻿import { validateLivePassAccess } from "@/lib/live-pass-guard";
+import { enforceResourceCreation } from "@/lib/scale-enforcement";
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 const SECRET = process.env.STREAM_SIGNING_SECRET || "dev-secret-change-in-production";
@@ -10,6 +12,25 @@ function signPayload(payloadB64: string): string {
 
 export async function POST(req: NextRequest) {
   try {
+    const __passCode = String((body as { passCode?: string } | undefined)?.passCode || "").trim();
+    if (__passCode) {
+      const __passCheck = await validateLivePassAccess(__passCode);
+      if (!__passCheck.allowed) {
+        return NextResponse.json(
+          { ok: false, allowed: false, code: __passCheck.code, error: __passCheck.error },
+          { status: __passCheck.httpStatus || 403 }
+        );
+      }
+    }
+
+    const __scaleGuard = await enforceResourceCreation({ resourceType: "stream" });
+    if (!__scaleGuard.allowed) {
+      return NextResponse.json(
+        { ok: false, allowed: false, code: __scaleGuard.code, error: __scaleGuard.reason },
+        { status: __scaleGuard.httpStatus }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const streamKey = typeof body.streamKey === "string" && body.streamKey.trim()
       ? body.streamKey.trim().replace(/[^a-zA-Z0-9_-]/g, "")
@@ -66,3 +87,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ valid: false, reason: "Payload inválido." }, { status: 401 });
   }
 }
+
+

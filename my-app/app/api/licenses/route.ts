@@ -1,9 +1,18 @@
+﻿import { enforceResourceCreation } from "@/lib/scale-enforcement";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { executeWithRetry, parseDbError } from "@/lib/db-query";
 
 export async function POST(req: NextRequest) {
   try {
+    const __scaleGuard = await enforceResourceCreation({ resourceType: "license" });
+    if (!__scaleGuard.allowed) {
+      return NextResponse.json(
+        { ok: false, allowed: false, code: __scaleGuard.code, error: __scaleGuard.reason },
+        { status: __scaleGuard.httpStatus }
+      );
+    }
+
     const body = await req.json();
     const streamId = Number(body.streamId);
     const buyerEmail = String(body.buyerEmail || "").trim();

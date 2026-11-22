@@ -1,3 +1,4 @@
+﻿import { enforceResourceCreation } from "@/lib/scale-enforcement";
 function getWebhookSecretFromRequest(req: NextRequest): string | null {
   return (
     req.nextUrl.searchParams.get("secret") ??
@@ -64,6 +65,14 @@ async function parseDonePayload(req: NextRequest): Promise<Record<string, string
 }
 
 export async function POST(req: NextRequest) {
+    const __scaleGuard = await enforceResourceCreation({ resourceType: "stream" });
+    if (!__scaleGuard.allowed) {
+      return NextResponse.json(
+        { ok: false, allowed: false, code: __scaleGuard.code, error: __scaleGuard.reason },
+        { status: __scaleGuard.httpStatus }
+      );
+    }
+
   const expectedSecret = process.env.RTMP_WEBHOOK_SECRET;
   const providedSecret = getWebhookSecretFromRequest(req);
   if (!expectedSecret || providedSecret !== expectedSecret) {
@@ -76,7 +85,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ended: false }, { status: 200 });
   }
 
-  const pool = getDbPool();
+  const pool = await getDbPool();
   const conn = await pool.getConnection();
 
   try {
@@ -148,6 +157,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   return POST(req);
 }
+
+
 
 
 
