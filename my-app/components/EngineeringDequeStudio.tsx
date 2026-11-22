@@ -68,177 +68,221 @@ function deliveryLabel(mode: DeliveryMode) {
   return "Hibrido (Disco + Nuvem)";
 }
 
-function renderMediaArt(
+// Sintese acustica limpa via Web Audio API (sem dependencia externa)
+function playAcousticPulse(freqHz = 220, durationSec = 0.24) {
+  if (typeof window === "undefined") return;
+  const AudioCtx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return;
+
+  try {
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const sub = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freqHz, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freqHz * 1.35, ctx.currentTime + durationSec * 0.7);
+
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(freqHz * 0.5, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0008, ctx.currentTime + durationSec);
+
+    osc.connect(gain);
+    sub.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    sub.start();
+    osc.stop(ctx.currentTime + durationSec + 0.02);
+    sub.stop(ctx.currentTime + durationSec + 0.02);
+    setTimeout(() => {
+      ctx.close().catch(() => {});
+    }, (durationSec + 0.1) * 1000);
+  } catch {
+    // Ignora caso o navegador bloqueie audio antes de gesto do usuario
+  }
+}
+
+function renderCerroGradle3D(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
-  node: EngineeringGameNode,
-  mode: DeliveryMode,
   t: number,
+  boostLevel: number,
   isMini: boolean
 ) {
-  const lower = node.discipline.toLowerCase();
+  // Projecao 3D isometrica com rotacao sutil
+  const yaw = Math.sin(t * 0.9) * 0.22;
+  const cosY = Math.cos(yaw);
+  const sinY = Math.sin(yaw);
+  const pitch = 0.26;
+  const cosP = Math.cos(pitch);
+  const sinP = Math.sin(pitch);
 
-  // Fundo escuro de instrumentacao tecnica com gradiente sutil
+  const scale = isMini ? Math.min(w, h) * 0.26 : Math.min(w, h) * 0.34;
+  const cx = w * (isMini ? 0.52 : 0.46);
+  const cy = h * (isMini ? 0.58 : 0.56);
+
+  const project3D = (x: number, y: number, z: number) => {
+    const x1 = x * cosY - z * sinY;
+    const z1 = x * sinY + z * cosY;
+    const y2 = y * cosP - z1 * sinP;
+    const z2 = y * sinP + z1 * cosP;
+    const persp = 4.2 / Math.max(1.8, 4.2 + z2);
+    return {
+      px: cx + x1 * scale * persp,
+      py: cy + y2 * scale * persp,
+      depth: z2
+    };
+  };
+
+  // Fundo escuro com grade espacial 3D
   const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, "#050811");
-  bg.addColorStop(0.55, "#091120");
-  bg.addColorStop(1, "#060a14");
+  bg.addColorStop(0, "#04070f");
+  bg.addColorStop(0.5, "#081224");
+  bg.addColorStop(1, "#050914");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
-  // Malha de engenharia de precisao
-  const step = isMini ? 16 : 24;
   ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
   ctx.lineWidth = 1;
-  for (let x = 0; x <= w; x += step) {
+  const gridStep = isMini ? 18 : 28;
+  for (let gx = 0; gx <= w; gx += gridStep) {
     ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
+    ctx.moveTo(gx, 0);
+    ctx.lineTo(gx, h);
     ctx.stroke();
   }
-  for (let y = 0; y <= h; y += step) {
+  for (let gy = 0; gy <= h; gy += gridStep) {
     ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
+    ctx.moveTo(0, gy);
+    ctx.lineTo(w, gy);
     ctx.stroke();
   }
 
-  // Arte eletronica especifica por dominio de engenharia
-  if (lower.includes("eletrica") || lower.includes("energia")) {
-    const baseY = h * 0.56;
-    const amp = isMini ? 14 : 30;
-    // Tres fases senoidais defasadas (120 graus)
-    const phases = [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3];
-    const colors = ["#2dd4bf", "#38bdf8", "#f59e0b"];
+  // Corpo estrutural do elefante em malha 3D (elipsoide + cabeca + patas + tromba energizada)
+  const bodyRings = isMini ? 8 : 14;
+  const ringPts = isMini ? 10 : 16;
+  ctx.strokeStyle = "rgba(148, 163, 184, 0.32)";
+  ctx.lineWidth = isMini ? 1 : 1.3;
 
-    phases.forEach((ph, idx) => {
-      ctx.beginPath();
-      for (let x = 8; x < w - 8; x += 3) {
-        const norm = x / Math.max(1, w - 16);
-        const y =
-          baseY +
-          Math.sin(norm * Math.PI * (isMini ? 3 : 5) - t * 2.4 + ph) * amp * Math.sin(norm * Math.PI);
-        if (x === 8) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = colors[idx];
-      ctx.lineWidth = isMini ? 1.5 : 2.2;
-      ctx.stroke();
+  for (let i = 0; i <= bodyRings; i++) {
+    const u = (i / bodyRings) * Math.PI;
+    const bx = Math.cos(u) * 1.15 - 0.15;
+    const rx = Math.sin(u) * 0.78;
+    const rz = Math.sin(u) * 0.66;
+
+    ctx.beginPath();
+    for (let j = 0; j <= ringPts; j++) {
+      const v = (j / ringPts) * Math.PI * 2;
+      const pt = project3D(bx, -Math.cos(v) * rx + 0.05, Math.sin(v) * rz);
+      if (j === 0) ctx.moveTo(pt.px, pt.py);
+      else ctx.lineTo(pt.px, pt.py);
+    }
+    ctx.stroke();
+  }
+
+  // Cabeca e orelhas estruturais 3D
+  const headCenter = project3D(0.88, -0.22, 0.08);
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = isMini ? 1.4 : 2;
+  ctx.beginPath();
+  ctx.arc(headCenter.px, headCenter.py, scale * 0.42, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Quatro patas em coordenadas 3D
+  const legs = [
+    [-0.75, 0.45, 0.38],
+    [-0.75, 0.45, -0.38],
+    [0.52, 0.45, 0.38],
+    [0.52, 0.45, -0.38]
+  ];
+  legs.forEach(([lx, ly, lz]) => {
+    const top = project3D(lx, ly - 0.22, lz);
+    const bot = project3D(lx, ly + 0.55, lz);
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.55)";
+    ctx.lineWidth = isMini ? 2 : 3.2;
+    ctx.beginPath();
+    ctx.moveTo(top.px, top.py);
+    ctx.lineTo(bot.px, bot.py);
+    ctx.stroke();
+  });
+
+  // Tromba curva 3D turbinada por fiacao eletrica multifasica
+  const trunkSteps = isMini ? 16 : 28;
+  const trunkPoints: { x: number; y: number; z: number }[] = [];
+  for (let s = 0; s <= trunkSteps; s++) {
+    const k = s / trunkSteps;
+    const tx = 1.18 + Math.sin(k * Math.PI * 0.85) * 0.65;
+    const ty = -0.1 + k * 0.88 - Math.sin(k * Math.PI) * 0.16;
+    const tz = 0.12 + Math.cos(k * Math.PI * 1.2) * 0.18;
+    trunkPoints.push({ x: tx, y: ty, z: tz });
+  }
+
+  // Nucleo da tromba
+  ctx.strokeStyle = "#2dd4bf";
+  ctx.lineWidth = isMini ? 3.5 : 6.5;
+  ctx.beginPath();
+  trunkPoints.forEach((pt, idx) => {
+    const p = project3D(pt.x, pt.y, pt.z);
+    if (idx === 0) ctx.moveTo(p.px, p.py);
+    else ctx.lineTo(p.px, p.py);
+  });
+  ctx.stroke();
+
+  // Tres cabos de fiacao eletrica helicoidais envolvendo e turbinando a tromba
+  const wires = [
+    { color: "#f59e0b", offset: 0 },
+    { color: "#38bdf8", offset: (Math.PI * 2) / 3 },
+    { color: "#2dd4bf", offset: (Math.PI * 4) / 3 }
+  ];
+
+  wires.forEach((wire) => {
+    ctx.strokeStyle = wire.color;
+    ctx.lineWidth = isMini ? 1.2 : 2;
+    ctx.beginPath();
+    trunkPoints.forEach((pt, idx) => {
+      const k = idx / trunkSteps;
+      const rad = (0.14 - k * 0.06) * (1 + boostLevel * 0.12);
+      const ang = k * Math.PI * 6 - t * (5 + boostLevel * 2) + wire.offset;
+      const wx = pt.x + Math.cos(ang) * rad * 0.4;
+      const wy = pt.y + Math.sin(ang) * rad;
+      const wz = pt.z + Math.sin(ang) * rad;
+      const p = project3D(wx, wy, wz);
+      if (idx === 0) ctx.moveTo(p.px, p.py);
+      else ctx.lineTo(p.px, p.py);
     });
-
-    // Barramento e pico de transiente
-    const pulseX = 16 + (((Math.sin(t * 1.5) + 1) / 2) * Math.max(1, w - 32));
-    ctx.fillStyle = "rgba(45, 212, 191, 0.16)";
-    ctx.beginPath();
-    ctx.arc(pulseX, baseY, isMini ? 6 : 12, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (lower.includes("civil") || lower.includes("estrutural")) {
-    // Trelica estrutural sob carga dinamica e mapa de tensao
-    const padX = isMini ? 14 : 36;
-    const topY = isMini ? 22 : 44;
-    const botY = isMini ? h - 22 : h - 42;
-    const bays = isMini ? 4 : 6;
-    const span = (w - padX * 2) / bays;
-    const deflection = Math.sin(t * 2.0) * (isMini ? 3 : 8);
-
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = isMini ? 1.5 : 2.5;
-    ctx.beginPath();
-    ctx.moveTo(padX, botY);
-    ctx.lineTo(w - padX, botY);
     ctx.stroke();
+  });
 
-    for (let i = 0; i < bays; i++) {
-      const x1 = padX + i * span;
-      const x2 = x1 + span;
-      const midX = (x1 + x2) / 2;
-      const midY = topY + deflection * Math.sin(((i + 0.5) / bays) * Math.PI);
+  // Fagulhas / pulsos de energia disparando na ponta da tromba
+  const tip = trunkPoints[trunkPoints.length - 1];
+  const tipProj = project3D(tip.x, tip.y, tip.z);
+  const sparkCount = isMini ? 4 : 9;
+  for (let sp = 0; sp < sparkCount; sp++) {
+    const phase = ((t * (1.8 + boostLevel * 0.5) + sp / sparkCount) % 1 + 1) % 1;
+    const angle = sp * 0.75 + t * 2.2;
+    const dist = phase * (isMini ? 16 : 36);
+    const sx = tipProj.px + Math.cos(angle) * dist;
+    const sy = tipProj.py + Math.sin(angle) * dist * 0.7;
 
-      ctx.strokeStyle = i % 2 === 0 ? "#38bdf8" : "#2dd4bf";
-      ctx.lineWidth = isMini ? 1.5 : 2;
-      ctx.beginPath();
-      ctx.moveTo(x1, botY);
-      ctx.lineTo(midX, midY);
-      ctx.lineTo(x2, botY);
-      ctx.lineTo(midX, midY);
-      ctx.stroke();
-
-      // Vetor de carga vertical
-      ctx.strokeStyle = "#f59e0b";
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(midX, Math.max(8, midY - (isMini ? 8 : 16)));
-      ctx.lineTo(midX, midY);
-      ctx.stroke();
-    }
-  } else if (lower.includes("mecanica") || lower.includes("controle")) {
-    // Escoamento turbulento em duto + malha de controle
-    const ductTop = isMini ? 24 : 46;
-    const ductBot = isMini ? h - 24 : h - 46;
-    const midY = (ductTop + ductBot) / 2;
-
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.45)";
-    ctx.lineWidth = isMini ? 1.5 : 2;
-    ctx.strokeRect(12, ductTop, Math.max(20, w - 24), Math.max(16, ductBot - ductTop));
-
-    const particles = isMini ? 10 : 22;
-    for (let i = 0; i < particles; i++) {
-      const u = ((t * 0.28 + i / particles) % 1 + 1) % 1;
-      const px = 16 + u * Math.max(10, w - 32);
-      const py =
-        midY +
-        Math.sin(u * Math.PI * 6 + t * 3 + i) * ((ductBot - ductTop) * 0.28);
-      ctx.fillStyle = i % 3 === 0 ? "#f59e0b" : "#2dd4bf";
-      ctx.beginPath();
-      ctx.arc(px, py, isMini ? 2 : 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  } else {
-    // Malha distribuida de telemetria / nuvem / disco / streaming
-    const cols = isMini ? 4 : 7;
-    const rows = isMini ? 2 : 3;
-    const gx = (w - 32) / Math.max(1, cols - 1);
-    const gy = (h - 44) / Math.max(1, rows - 1);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const cx = 16 + c * gx;
-        const cy = 24 + r * gy;
-        const active = ((Math.floor(t * 3 + r + c)) % 5) === 0;
-
-        if (c < cols - 1) {
-          ctx.strokeStyle = active ? "rgba(45, 212, 191, 0.55)" : "rgba(56, 189, 248, 0.18)";
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.lineTo(cx + gx, cy);
-          ctx.stroke();
-        }
-
-        ctx.fillStyle = active ? "#2dd4bf" : "#38bdf8";
-        ctx.beginPath();
-        ctx.arc(cx, cy, isMini ? 2.5 : 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  // Pacotes de entrega (Disco / Nuvem / Hibrido)
-  const packetCount = mode === "hibrido" ? (isMini ? 4 : 8) : (isMini ? 2 : 5);
-  for (let p = 0; p < packetCount; p++) {
-    const prog = ((t * 0.22 + p / packetCount) % 1 + 1) % 1;
-    const px = 12 + prog * Math.max(10, w - 24);
-    const py = h - (isMini ? 10 : 18);
-    ctx.fillStyle = p % 2 === 0 ? "#2dd4bf" : "#38bdf8";
-    ctx.fillRect(px - 3, py - 2, 6, 4);
+    ctx.fillStyle = sp % 2 === 0 ? "#2dd4bf" : "#f59e0b";
+    ctx.beginPath();
+    ctx.arc(sx, sy, isMini ? 2 : 3.4, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   if (!isMini) {
     ctx.fillStyle = "#e2e8f0";
     ctx.font = "600 11px monospace";
     ctx.fillText(
-      `${node.code} · ${node.discipline.toUpperCase()} · ${deliveryLabel(mode).toUpperCase()}`,
+      `CERRO-GRADLE 3D // FIACAO ELETRICA NA TROMBA · BUILD & PIPELINE SE ENGENHARIA DE SOFTWARE`,
       14,
       18
     );
@@ -246,25 +290,30 @@ function renderMediaArt(
     ctx.fillStyle = "#94a3b8";
     ctx.font = "11px monospace";
     ctx.fillText(
-      `${node.rawSample.primaryMetricLabel}: ${node.rawSample.primaryMetricValue} | ${node.rawSample.secondaryMetricLabel}: ${node.rawSample.secondaryMetricValue} | SDLC ${node.sdlcProgress}%`,
+      `PULSO ACUSTICO HARMONICO · FASES 3F ATIVAS · TURBO=${boostLevel}x`,
       14,
-      h - 28
+      h - 14
     );
   }
 }
 
-function EngineeringMediaCanvas({
+function CerroGradleMediaCanvas({
   node,
   mode,
   flowPulse,
+  soundEnabled,
   isMini = false
 }: {
   node: EngineeringGameNode;
   mode: DeliveryMode;
   flowPulse: number;
+  soundEnabled: boolean;
   isMini?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isCerroGradle =
+    node.title.toLowerCase().includes("cerro-gradle") ||
+    node.discipline.toLowerCase().includes("software");
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -273,29 +322,92 @@ function EngineeringMediaCanvas({
     if (!ctx) return;
 
     let rafId = 0;
-    let start = performance.now() - flowPulse * 350;
+    const start = performance.now() - flowPulse * 300;
+    const boostLevel = 1 + (flowPulse % 5) * 0.25 + (node.licenseActive ? 0.5 : 0);
 
-    const tick = (now: number) => {
-      const elapsed = (now - start) / 1000;
-      renderMediaArt(ctx, canvas.width, canvas.height, node, mode, elapsed, isMini);
-      rafId = requestAnimationFrame(tick);
+    const renderLoop = (now: number) => {
+      const t = (now - start) / 1000;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      if (isCerroGradle) {
+        renderCerroGradle3D(ctx, w, h, t, boostLevel, isMini);
+      } else {
+        // Renderizacao tecnica padrao para demais engenharias no Deque
+        const bg = ctx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, "#050811");
+        bg.addColorStop(1, "#091222");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= w; x += 24) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+
+        ctx.beginPath();
+        for (let x = 12; x < w - 12; x += 4) {
+          const u = x / Math.max(1, w - 24);
+          const y = h * 0.5 + Math.sin(u * Math.PI * 5 - t * 3) * (isMini ? 16 : 34);
+          if (x === 12) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = node.licenseActive ? "#2dd4bf" : "#38bdf8";
+        ctx.lineWidth = isMini ? 1.8 : 2.5;
+        ctx.stroke();
+
+        if (!isMini) {
+          ctx.fillStyle = "#e2e8f0";
+          ctx.font = "600 11px monospace";
+          ctx.fillText(
+            `${node.code} · ${node.discipline.toUpperCase()} · ${deliveryLabel(mode).toUpperCase()}`,
+            14,
+            18
+          );
+        }
+      }
+
+      rafId = requestAnimationFrame(renderLoop);
     };
 
-    rafId = requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(renderLoop);
     return () => cancelAnimationFrame(rafId);
-  }, [node, mode, flowPulse, isMini]);
+  }, [node, mode, flowPulse, isCerroGradle, isMini]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={isMini ? 320 : 760}
-      height={isMini ? 116 : 240}
-      className={
-        isMini
-          ? "h-28 w-full rounded-lg border border-slate-800 bg-slate-950"
-          : "h-56 w-full rounded-xl border border-slate-800 bg-slate-950"
-      }
-    />
+    <div className="relative">
+      <canvas
+        ref={canvasRef}
+        width={isMini ? 320 : 760}
+        height={isMini ? 124 : 250}
+        className={
+          isMini
+            ? "h-30 w-full rounded-lg border border-slate-800 bg-slate-950"
+            : "h-60 w-full rounded-xl border border-slate-800 bg-slate-950"
+        }
+      />
+      {!isMini && (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-500">
+          <span>
+            {isCerroGradle
+              ? "Visual 3D: Fiaca eletrica energizando a tromba do elefante em rotacao espacial."
+              : `Telemetria ativa em ${deliveryLabel(mode)}.`}
+          </span>
+          <button
+            type="button"
+            onClick={() => playAcousticPulse(isCerroGradle ? 264 : 220, 0.28)}
+            disabled={!soundEnabled}
+            className="rounded-md border border-teal-600/40 bg-teal-600/10 px-2.5 py-1 text-[11px] font-semibold text-teal-700 hover:bg-teal-600/20 disabled:opacity-40 dark:text-teal-300"
+          >
+            Disparar Pulso Acustico
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -307,14 +419,15 @@ export default function EngineeringDequeStudio({
   const [selectedId, setSelectedId] = useState<string>(initialDeque[0]?.id ?? "");
   const [activeDelivery, setActiveDelivery] = useState<DeliveryMode>("hibrido");
   const [customTitle, setCustomTitle] = useState("");
-  const [customDiscipline, setCustomDiscipline] = useState("Engenharia de Controle");
+  const [customDiscipline, setCustomDiscipline] = useState("Engenharia de Software");
   const [customPrice, setCustomPrice] = useState("189.00");
   const [autoCirculate, setAutoCirculate] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [flowPulse, setFlowPulse] = useState(0);
   const [lastMoveDir, setLastMoveDir] = useState<"left" | "right">("right");
   const [rawTab, setRawTab] = useState<"telemetry" | "json">("telemetry");
   const [eventLog, setEventLog] = useState<string[]>([
-    `[SSR ${serverRenderedAt}] Deque carregado com ${initialDeque.length} modulos de Engenharia e dados brutos.`
+    `[SSR ${serverRenderedAt}] Deque ativo com Cerro-Gradle 3D, fiacao eletrica na tromba e dados brutos.`
   ]);
 
   const selectedNode = useMemo(
@@ -322,9 +435,12 @@ export default function EngineeringDequeStudio({
     [deque, selectedId]
   );
 
-  const pushLog = (msg: string) => {
+  const pushLog = (msg: string, acousticFreq?: number) => {
     const now = new Date().toLocaleTimeString("pt-BR");
     setEventLog((prev) => [`[${now}] ${msg}`, ...prev.slice(0, 12)]);
+    if (soundEnabled && acousticFreq) {
+      playAcousticPulse(acousticFreq, 0.22);
+    }
   };
 
   const rotateDeque = (direction: "front_to_rear" | "rear_to_front", silent = false) => {
@@ -346,7 +462,8 @@ export default function EngineeringDequeStudio({
       pushLog(
         direction === "front_to_rear"
           ? "DEQUE: Circulacao FRONT -> REAR executada."
-          : "DEQUE: Circulacao REAR -> FRONT executada."
+          : "DEQUE: Circulacao REAR -> FRONT executada.",
+        196
       );
     }
   };
@@ -360,7 +477,7 @@ export default function EngineeringDequeStudio({
   }, [autoCirculate, deque.length]);
 
   const insertNode = (end: "front" | "rear") => {
-    const title = customTitle.trim() || `Planta Piloto ${customDiscipline} v3.1`;
+    const title = customTitle.trim() || `Cerro-Gradle ${customDiscipline} Node`;
     const price = Math.max(29.0, Number(customPrice) || 189.0);
     const id = `eng-${Date.now().toString(36)}`;
     const code = `ENG-${Math.floor(100 + Math.random() * 899)}`;
@@ -371,7 +488,7 @@ export default function EngineeringDequeStudio({
       title,
       discipline: customDiscipline,
       realWorldProblem:
-        "Estabilidade dinamica, resposta em malha fechada e integridade de pacotes sob carga real.",
+        "Pipeline de compilacao, entrega de pacotes em disco/nuvem e validacao de licenca em producao.",
       stockUnits: 60,
       priceBrl: price,
       diskSizeGb: 21.4,
@@ -388,18 +505,19 @@ export default function EngineeringDequeStudio({
       deliveryMode: activeDelivery,
       lastServerSync: new Date().toLocaleTimeString("pt-BR"),
       rawSample: {
-        sampleRateHz: 1000,
-        primaryMetricLabel: "Variavel Processo",
-        primaryMetricValue: "98.42%",
-        secondaryMetricLabel: "Latencia Loop",
-        secondaryMetricValue: "4.2 ms",
-        rawTelemetryFrame: `FRM|${code}|TS=${Date.now()}|V=230.4|I=18.7|CRC=0x9F4A`,
+        sampleRateHz: 4800,
+        primaryMetricLabel: "Throughput Build",
+        primaryMetricValue: "19.2k req/s",
+        secondaryMetricLabel: "Latencia P99",
+        secondaryMetricValue: "6.4 ms",
+        rawTelemetryFrame: `RAW|${code}|ENGINE=CERRO-GRADLE|BUS=3F_TURBO|HMAC=OK|CRC=7B91`,
         payloadJson: JSON.stringify(
           {
-            moduleCode: code,
+            module: title,
+            code,
             discipline: customDiscipline,
             delivery: activeDelivery,
-            licenseModel: "production_perpetual_lease",
+            licenseModel: "production_enterprise",
             protocols: ["HMAC-SHA256", "STREAM-TOKEN", "CHUNK-SHA256", "LEASE-SYNC"]
           },
           null,
@@ -412,7 +530,7 @@ export default function EngineeringDequeStudio({
     setDeque((prev) => (end === "front" ? [newNode, ...prev] : [...prev, newNode]));
     setSelectedId(id);
     setCustomTitle("");
-    pushLog(`DEQUE ${end.toUpperCase()}: Inserido "${title}" (${code}) no servidor.`);
+    pushLog(`DEQUE ${end.toUpperCase()}: Inserido "${title}" (${code}).`, 293.66);
   };
 
   const removeEnd = (end: "front" | "rear") => {
@@ -423,7 +541,7 @@ export default function EngineeringDequeStudio({
     if (selectedId === target.id) {
       setSelectedId(remaining[0]?.id ?? "");
     }
-    pushLog(`DEQUE ${end.toUpperCase()}: Removido "${target.title}".`);
+    pushLog(`DEQUE ${end.toUpperCase()}: Removido "${target.title}".`, 164.81);
   };
 
   const purchaseAndDownload = (nodeId: string, mode: DeliveryMode) => {
@@ -448,7 +566,8 @@ export default function EngineeringDequeStudio({
               : SDLC_STAGES[1];
 
         pushLog(
-          `COMPRA & DOWNLOAD [${deliveryLabel(mode)}]: "${item.title}" baixado. Estoque: ${nextStock}. Licenca producao ativa.`
+          `COMPRA & DOWNLOAD [${deliveryLabel(mode)}]: "${item.title}" baixado. Estoque: ${nextStock}. Licenca producao ativa.`,
+          329.63
         );
 
         return {
@@ -473,7 +592,7 @@ export default function EngineeringDequeStudio({
         const nextStage =
           SDLC_STAGES[Math.min(SDLC_STAGES.length - 1, Math.max(0, currentIdx + 1))];
         const active = nextStage.pct === 100 || item.licenseActive;
-        pushLog(`SDLC [${item.code}]: ${nextStage.pct}% (${nextStage.label}).`);
+        pushLog(`SDLC [${item.code}]: ${nextStage.pct}% (${nextStage.label}).`, 261.63);
         return {
           ...item,
           sdlcStage: nextStage.label,
@@ -494,7 +613,7 @@ export default function EngineeringDequeStudio({
       prev.map((item) => {
         if (item.id !== nodeId) return item;
         const updatedVal = !item.protocols[key];
-        pushLog(`PROTOCOLO [${item.code}] ${key}: ${updatedVal ? "OK" : "CHECK"}.`);
+        pushLog(`PROTOCOLO [${item.code}] ${key}: ${updatedVal ? "OK" : "CHECK"}.`, 246.94);
         return {
           ...item,
           protocols: {
@@ -508,7 +627,6 @@ export default function EngineeringDequeStudio({
 
   return (
     <div className="space-y-6">
-      {/* Cabecalho e controle do Deque */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
@@ -520,19 +638,30 @@ export default function EngineeringDequeStudio({
                 DEQUE (Double-Ended Queue)
               </span>
               <span className="rounded-md bg-sky-500/15 px-2.5 py-0.5 text-xs font-medium text-sky-700 dark:text-sky-300">
-                DADOS BRUTOS &amp; ARTE DE MIDIA
+                3D + FIACAO ELETRICA + ACUSTICA
               </span>
               <span className="text-xs text-zinc-500">SSR: {serverRenderedAt}</span>
             </div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Laboratorio de Circulacao em Deque: Simuladores de Engenharia, Estoque e Licenca SDLC
+              Cerro-Gradle: Circulacao em Deque, Fiaca Eletrica 3D e Licenca SDLC para Engenharia de Software
             </h1>
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Cada modulo circula entre FRONT e REAR, exibe arte tecnica animada do problema real de engenharia, expoe dados brutos e permite compra/download em Disco/Console, Streaming em Nuvem ou Hibrido com licenca de producao.
+              Modelagem 3D com fiacao eletrica energizando a tromba, retorno acustico tecnico, dados brutos inspecionaveis e compra/download em Disco/Console, Nuvem ou Hibrido.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSoundEnabled((s) => !s)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                soundEnabled
+                  ? "border-sky-600 bg-sky-600/10 text-sky-700 dark:border-sky-400 dark:text-sky-300"
+                  : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {soundEnabled ? "Acustica: ON" : "Acustica: OFF"}
+            </button>
             <button
               type="button"
               onClick={() => setAutoCirculate((v) => !v)}
@@ -542,32 +671,31 @@ export default function EngineeringDequeStudio({
                   : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
               }`}
             >
-              {autoCirculate ? "Circulacao Continua: ON" : "Circulacao Continua: OFF"}
+              {autoCirculate ? "Deque Auto: ON" : "Deque Auto: OFF"}
             </button>
             <button
               type="button"
               onClick={() => rotateDeque("rear_to_front")}
               className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             >
-              Girar &larr; (REAR &rarr; FRONT)
+              Girar &larr;
             </button>
             <button
               type="button"
               onClick={() => rotateDeque("front_to_rear")}
               className="rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             >
-              Girar &rarr; (FRONT &rarr; REAR)
+              Girar &rarr;
             </button>
           </div>
         </div>
 
-        {/* Insercao no FRONT ou REAR */}
         <div className="mt-4 grid gap-3 border-t border-zinc-200 pt-4 sm:grid-cols-2 lg:grid-cols-5 dark:border-zinc-800">
           <input
             type="text"
             value={customTitle}
             onChange={(e) => setCustomTitle(e.target.value)}
-            placeholder="Ex.: Simulador de Rede Eletrica"
+            placeholder="Ex.: Cerro-Gradle Pipeline Core"
             className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-950"
           />
           <select
@@ -575,11 +703,10 @@ export default function EngineeringDequeStudio({
             onChange={(e) => setCustomDiscipline(e.target.value)}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-950"
           >
-            <option>Engenharia de Controle</option>
-            <option>Engenharia Estrutural</option>
             <option>Engenharia de Software</option>
-            <option>Engenharia Eletrica</option>
-            <option>Engenharia Mecanica</option>
+            <option>Engenharia Eletrica &amp; Energia</option>
+            <option>Engenharia Civil &amp; Estrutural</option>
+            <option>Engenharia Mecanica &amp; Controle</option>
           </select>
           <input
             type="text"
@@ -605,7 +732,7 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Trilho visual do Deque */}
+      {/* Trilho visual em Deque */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold">
@@ -671,10 +798,11 @@ export default function EngineeringDequeStudio({
                   </div>
                 </div>
 
-                <EngineeringMediaCanvas
+                <CerroGradleMediaCanvas
                   node={node}
                   mode={node.deliveryMode}
                   flowPulse={flowPulse}
+                  soundEnabled={soundEnabled}
                   isMini={true}
                 />
 
@@ -719,14 +847,14 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Bancada tecnica: Arte de Midia + Compra/Download + Dados Brutos + Protocolos */}
+      {/* Bancada 3D + Compra/Download + Dados Brutos + Protocolos + Logs */}
       {selectedNode && (
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="font-mono text-xs text-teal-700 dark:text-teal-400">
-                  BANCADA DE DEMONSTRACAO · {selectedNode.code} · {selectedNode.rawSample.sampleRateHz} Hz
+                  BANCADA 3D &amp; ACUSTICA · {selectedNode.code} · {selectedNode.rawSample.sampleRateHz} Hz
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -743,14 +871,14 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
-            <EngineeringMediaCanvas
+            <CerroGradleMediaCanvas
               node={selectedNode}
               mode={activeDelivery}
               flowPulse={flowPulse}
+              soundEnabled={soundEnabled}
               isMini={false}
             />
 
-            {/* Compra e download */}
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Comprar do Estoque do Servidor, Baixar e Garantir Licenca em Producao:
@@ -792,7 +920,6 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
-            {/* Dados brutos para recursos tecnicos */}
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
@@ -831,7 +958,6 @@ export default function EngineeringDequeStudio({
               </pre>
             </div>
 
-            {/* Protocolos auxiliares */}
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Protocolos Auxiliares (Clique para validar ou inspecionar):

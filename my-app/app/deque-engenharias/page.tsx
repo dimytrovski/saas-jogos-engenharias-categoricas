@@ -11,15 +11,16 @@ export default async function DequeEngenhariasPage() {
 
   const initialDeque: EngineeringGameNode[] = [
     {
-      id: "eng-sim-01",
+      id: "eng-cerro-gradle-01",
       code: "ENG-101",
-      title: "GridFlow 3D: Transientes em Subestacoes",
-      discipline: "Engenharia Eletrica & Energia",
-      realWorldProblem: "Analise trifasica, faltas fase-terra e resposta de disjuntores em 60 Hz.",
-      stockUnits: 120,
+      title: "Cerro-Gradle",
+      discipline: "Engenharia de Software",
+      realWorldProblem:
+        "Fiacao eletrica trifasica turbinando a tromba 3D para automacao de build, entrega em disco/nuvem e licenca de producao.",
+      stockUnits: 150,
       priceBrl: 189.0,
-      diskSizeGb: 24.6,
-      cloudBitrateMbps: 16.0,
+      diskSizeGb: 22.4,
+      cloudBitrateMbps: 17.5,
       sdlcProgress: 75,
       sdlcStage: "Verificacao de Protocolos",
       protocols: {
@@ -33,17 +34,18 @@ export default async function DequeEngenhariasPage() {
       lastServerSync: serverRenderedAt,
       rawSample: {
         sampleRateHz: 4800,
-        primaryMetricLabel: "Tensao Linha",
-        primaryMetricValue: "138.4 kV",
-        secondaryMetricLabel: "Distorcao THD",
-        secondaryMetricValue: "1.82%",
-        rawTelemetryFrame: "RAW|ENG-101|VA=79.91kV|VB=79.88kV|VC=79.95kV|FREQ=60.01Hz|CRC=A84E",
+        primaryMetricLabel: "Throughput Build",
+        primaryMetricValue: "21.6k req/s",
+        secondaryMetricLabel: "Latencia P99",
+        secondaryMetricValue: "5.8 ms",
+        rawTelemetryFrame:
+          "RAW|ENG-101|MODULE=CERRO-GRADLE|TRUNK_BUS=3F_ACTIVE|HMAC=VERIFIED|CRC=9E2C",
         payloadJson: JSON.stringify(
           {
             code: "ENG-101",
-            busKv: 138.4,
-            frequencyHz: 60.01,
-            thdPct: 1.82,
+            title: "Cerro-Gradle",
+            discipline: "Engenharia de Software",
+            visualMode: "3d_trunk_wire_boost_acoustic",
             deliveryTargets: ["disk_console", "cloud_stream", "hybrid"],
             licenseTier: "production_enterprise"
           },
@@ -57,7 +59,8 @@ export default async function DequeEngenhariasPage() {
       code: "ENG-204",
       title: "BridgeLoad Pro: Trelicas & Tensao Estrutural",
       discipline: "Engenharia Civil & Estrutural",
-      realWorldProblem: "Distribuicao de esforcos axiais, flambagem e flecha maxima sob carga movel.",
+      realWorldProblem:
+        "Distribuicao de esforcos axiais, flambagem e flecha maxima sob carga movel.",
       stockUnits: 85,
       priceBrl: 159.0,
       diskSizeGb: 19.2,
@@ -79,7 +82,8 @@ export default async function DequeEngenhariasPage() {
         primaryMetricValue: "2.45x",
         secondaryMetricLabel: "Flecha Central",
         secondaryMetricValue: "11.4 mm",
-        rawTelemetryFrame: "RAW|ENG-204|LOAD=420kN|SIGMA_MAX=164MPa|DEFLECT=11.4mm|CRC=7C19",
+        rawTelemetryFrame:
+          "RAW|ENG-204|LOAD=420kN|SIGMA_MAX=164MPa|DEFLECT=11.4mm|CRC=7C19",
         payloadJson: JSON.stringify(
           {
             code: "ENG-204",
@@ -99,7 +103,8 @@ export default async function DequeEngenhariasPage() {
       code: "ENG-309",
       title: "PipeLineOps: Escoamento & Malha PID",
       discipline: "Engenharia Mecanica & Controle",
-      realWorldProblem: "Controle de pressao, numero de Reynolds e amortecimento de golpe de ariete.",
+      realWorldProblem:
+        "Controle de pressao, numero de Reynolds e amortecimento de golpe de ariete.",
       stockUnits: 64,
       priceBrl: 219.0,
       diskSizeGb: 28.0,
@@ -121,7 +126,8 @@ export default async function DequeEngenhariasPage() {
         primaryMetricValue: "312.8 m3/h",
         secondaryMetricLabel: "Pressao Linha",
         secondaryMetricValue: "14.6 bar",
-        rawTelemetryFrame: "RAW|ENG-309|Q=312.8m3h|P=14.6bar|RE=1.48e5|PID_OUT=68.2%|CRC=5E02",
+        rawTelemetryFrame:
+          "RAW|ENG-309|Q=312.8m3h|P=14.6bar|RE=1.48e5|PID_OUT=68.2%|CRC=5E02",
         payloadJson: JSON.stringify(
           {
             code: "ENG-309",
@@ -141,7 +147,8 @@ export default async function DequeEngenhariasPage() {
       code: "ENG-412",
       title: "CloudScale Lab: Telemetria & Malha Distribuida",
       discipline: "Engenharia de Software & Nuvem",
-      realWorldProblem: "Consistencia de sessoes, vazao de pacotes e validacao criptografica em escala.",
+      realWorldProblem:
+        "Consistencia de sessoes, vazao de pacotes e validacao criptografica em escala.",
       stockUnits: 200,
       priceBrl: 129.0,
       diskSizeGb: 12.8,
@@ -163,7 +170,8 @@ export default async function DequeEngenhariasPage() {
         primaryMetricValue: "18.4k req/s",
         secondaryMetricLabel: "P99 Latencia",
         secondaryMetricValue: "9.8 ms",
-        rawTelemetryFrame: "RAW|ENG-412|RPS=18420|P99=9.8ms|IDEMPOTENCY=OK|HMAC=VERIFIED|CRC=3D8B",
+        rawTelemetryFrame:
+          "RAW|ENG-412|RPS=18420|P99=9.8ms|IDEMPOTENCY=OK|HMAC=VERIFIED|CRC=3D8B",
         payloadJson: JSON.stringify(
           {
             code: "ENG-412",
