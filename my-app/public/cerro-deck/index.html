@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cerro-Gradle · Deck</title>
+  <link rel="stylesheet" href="./cerro-deck.css" />
+</head>
+<body class="cerro-body">
+  <main
+    id="cerro-hypermedia-app"
+    class="cerro-shell"
+    data-module="ENG-101"
+    data-charge="25"
+    data-sdlc="75"
+    data-license="0"
+    data-bg-rule="backend-validated-only"
+  >
+    <header class="cerro-topbar">
+      <div class="cerro-status-cluster">
+        <span id="lic-indicator" class="cerro-dot cerro-dot--warn" aria-label="license"></span>
+        <div class="cerro-mini-bar" aria-hidden="true">
+          <div id="sdlc-bar-fill" class="cerro-mini-bar__fill" style="width: 75%;"></div>
+        </div>
+      </div>
+
+      <div class="cerro-mode-group" role="group" aria-label="media-mode">
+        <button type="button" class="cerro-btn cerro-btn--active" data-mode="2d" aria-label="2d">
+          <span class="cerro-glyph cerro-glyph--ring"></span>
+        </button>
+        <button type="button" class="cerro-btn" data-mode="svg" aria-label="svg">
+          <span class="cerro-glyph cerro-glyph--diamond"></span>
+        </button>
+        <button type="button" class="cerro-btn" data-mode="wave" aria-label="wave">
+          <span class="cerro-glyph cerro-glyph--pulse"></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="cerro-deque-strip" aria-label="deque">
+      <button type="button" id="push-front-btn" class="cerro-btn" aria-label="push-front">
+        <span class="cerro-glyph cerro-glyph--plus"></span>
+      </button>
+      <div id="deque-rail" class="cerro-rail"></div>
+      <button type="button" id="push-rear-btn" class="cerro-btn" aria-label="push-rear">
+        <span class="cerro-glyph cerro-glyph--plus"></span>
+      </button>
+    </section>
+
+    <section class="cerro-stage-grid">
+      <div class="cerro-stage-frame">
+        <canvas id="cerro-canvas" width="260" height="260"></canvas>
+        <svg id="cerro-svg-overlay" class="cerro-svg-overlay is-hidden" viewBox="0 0 260 260" aria-hidden="true">
+          <circle cx="130" cy="130" r="110" fill="none" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="7 5" />
+          <polygon points="130,22 222,182 38,182" fill="none" stroke="#f59e0b" stroke-width="1.2" opacity="0.7" />
+        </svg>
+      </div>
+
+      <div class="cerro-controls-col">
+        <div class="cerro-meter-box">
+          <input id="gain-slider" type="range" min="15" max="100" value="75" aria-label="gain" />
+          <div class="cerro-meter-track">
+            <div id="charge-bar-fill" class="cerro-meter-fill" style="width: 25%;"></div>
+          </div>
+        </div>
+
+        <div class="cerro-action-grid">
+          <button type="button" id="pulse-5-btn" class="cerro-btn cerro-btn--sky" aria-label="pulse-5">
+            <span class="cerro-glyph cerro-glyph--ring"></span>
+          </button>
+          <button type="button" id="trunk-10-btn" class="cerro-btn cerro-btn--amber" aria-label="trunk-10">
+            <span class="cerro-glyph cerro-glyph--diamond"></span>
+          </button>
+          <button type="button" id="license-toggle-btn" class="cerro-btn cerro-btn--emerald" aria-label="license-toggle">
+            <span class="cerro-glyph cerro-glyph--square"></span>
+          </button>
+          <button type="button" id="next-mod-btn" class="cerro-btn cerro-btn--teal" aria-label="next-module">
+            <span class="cerro-glyph cerro-glyph--arrow"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./cerro-deck.js"></script>
+</body>
+</html>

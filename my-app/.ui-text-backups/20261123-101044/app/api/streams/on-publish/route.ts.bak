@@ -1,0 +1,164 @@
+﻿import { NextRequest, NextResponse } from "next/server";
+import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import { getDbPool } from "../../../../lib/db";
+
+interface LicenseRow extends RowDataPacket {
+  id: number;
+  stream_key: string;
+  token: string;
+  status: "active" | "revoked" | "expired";
+  single_use: number;
+  expires_at: string | null;
+  activated_at: string | null;
+}
+
+async function parseStreamPayload(req: NextRequest): Promise<Record<string, string>> {
+  const payload: Record<string, string> = {};
+
+  req.nextUrl.searchParams.forEach((value, key) => {
+    payload[key] = value;
+  });
+
+  const contentType = (req.headers.get("content-type") || "").toLowerCase();
+  const rawBody = await req.text();
+
+  if (rawBody) {
+    if (contentType.includes("application/json")) {
+      try {
+        const parsed = JSON.parse(rawBody) as Record<string, unknown>;
+        for (const [key, value] of Object.entries(parsed)) {
+          if (value !== undefined && value !== null) {
+            payload[key] = String(value);
+          }
+        }
+      } catch {
+        // Ignora JSON invalido
+      }
+    } else {
+      const formParams = new URLSearchParams(rawBody);
+      formParams.forEach((value, key) => {
+        payload[key] = value;
+      });
+    }
+  }
+
+  return payload;
+}
+
+export async function POST(req: NextRequest) {
+  const data = await parseStreamPayload(req);
+  const streamKey = (data.name || data.stream || "").trim();
+  const token = (data.key || data.token || data.auth || "").trim();
+  const appName = (data.app || "").trim() || null;
+  const clientIp =
+    (data.addr || req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || null;
+
+  if (!streamKey || !token) {
+    return NextResponse.json(
+      { authorized: false, error: "streamKey e token sao obrigatorios" },
+      { status: 403 }
+    );
+  }
+
+  const pool = getDbPool();
+  const conn = await pool.getConnection();
+
+  try {
+    await conn.beginTransaction();
+
+    const [rows] = await conn.query<LicenseRow[]>(
+      `SELECT id, stream_key, token, status, single_use, expires_at, activated_at
+       FROM stream_licenses
+       WHERE token = ?
+       LIMIT 1
+       FOR UPDATE`,
+      [token]
+    );
+
+    const license = rows[0];
+
+    if (!license) {
+      await conn.query(
+        `INSERT INTO stream_sessions (license_id, stream_key, token, app_name, client_ip, status, ended_at)
+         VALUES (NULL, ?, ?, ?, ?, 'rejected', UTC_TIMESTAMP())`,
+        [streamKey, token, appName, clientIp]
+      );
+      await conn.commit();
+      return NextResponse.json(
+        { authorized: false, error: "Token inexistente" },
+        { status: 403 }
+      );
+    }
+
+    const isExpired =
+      license.status === "expired" ||
+      (license.expires_at !== null && new Date(license.expires_at).getTime() <= Date.now());
+
+    if (license.status !== "active" || isExpired) {
+      await conn.query(
+        `INSERT INTO stream_sessions (license_id, stream_key, token, app_name, client_ip, status, ended_at)
+         VALUES (?, ?, ?, ?, ?, 'rejected', UTC_TIMESTAMP())`,
+        [license.id, streamKey, token, appName, clientIp]
+      );
+      await conn.commit();
+      return NextResponse.json(
+        { authorized: false, error: "Licenca revogada ou expirada" },
+        { status: 403 }
+      );
+    }
+
+    if (license.stream_key !== streamKey) {
+      await conn.query(
+        `INSERT INTO stream_sessions (license_id, stream_key, token, app_name, client_ip, status, ended_at)
+         VALUES (?, ?, ?, ?, ?, 'rejected', UTC_TIMESTAMP())`,
+        [license.id, streamKey, token, appName, clientIp]
+      );
+      await conn.commit();
+      return NextResponse.json(
+        { authorized: false, error: "Token nao pertence a este streamKey" },
+        { status: 403 }
+      );
+    }
+
+    await conn.query(
+      `UPDATE stream_licenses
+       SET activated_at = COALESCE(activated_at, UTC_TIMESTAMP())
+       WHERE id = ?`,
+      [license.id]
+    );
+
+    const [insertRes] = await conn.query<ResultSetHeader>(
+      `INSERT INTO stream_sessions (license_id, stream_key, token, app_name, client_ip, status)
+       VALUES (?, ?, ?, ?, ?, 'live')`,
+      [license.id, streamKey, token, appName, clientIp]
+    );
+
+    await conn.commit();
+
+    return NextResponse.json(
+      {
+        authorized: true,
+        streamKey,
+        licenseId: license.id,
+        sessionId: insertRes.insertId,
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    await conn.rollback();
+    console.error("Erro no on-publish MariaDB:", err);
+    return NextResponse.json(
+      { authorized: false, error: "Falha interna ao validar licenca" },
+      { status: 500 }
+    );
+  } finally {
+    conn.release();
+  }
+}
+
+export async function GET(req: NextRequest) {
+  return POST(req);
+}
+
+
+
