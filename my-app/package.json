@@ -10,9 +10,12 @@
     },
     "dependencies": {
         "@next/swc-win32-x64-msvc": "^16.4.6",
+        "clsx": "^2.1.1",
         "dashjs": "^5.3.0",
         "hls.js": "^1.7.4",
+        "jose": "^6.2.18",
         "js": "^0.1.0",
+        "lucide-react": "^1.78.0",
         "mysql2": "^3.24.6",
         "next": "16.4.6",
         "nodemailer": "^10.6.1",
@@ -23,6 +26,7 @@
         "react-dom": "19.3.0",
         "redis": "^6.3.1",
         "socket.io": "^4.8.4",
+        "tailwind-merge": "^3.7.1",
         "websock": "^0.3.19"
     },
     "devDependencies": {

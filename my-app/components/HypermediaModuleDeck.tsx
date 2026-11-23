@@ -1,6 +1,17 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import {
+  Activity,
+  ArrowRight,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  Unlock,
+  Volume2,
+  Waves
+} from "lucide-react";
+import { cn } from "@/lib/cn";
 
 interface HypermediaModuleDeckProps {
   moduleCode: string;
@@ -15,7 +26,7 @@ interface HypermediaModuleDeckProps {
 
 const PHI = 1.61803398875;
 
-function playCue(freq: number, kind: "pulse" | "trunk" | "lock") {
+function playNativeCue(freq: number, kind: "pulse" | "trunk" | "lock") {
   if (typeof window === "undefined") return;
   const AudioCtx =
     window.AudioContext ||
@@ -65,7 +76,7 @@ export default function HypermediaModuleDeck({
 }: HypermediaModuleDeckProps) {
   const [mode, setMode] = useState<"2d" | "svg" | "wave">("2d");
   const [gainPct, setGainPct] = useState(75);
-  const [bgSpec, setBgSpec] = useState<unknown>(null);
+  const [sessionToken, setSessionToken] = useState<string>("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -139,27 +150,33 @@ export default function HypermediaModuleDeck({
     return () => cancelAnimationFrame(rafId);
   }, [mode, chargePct, gainPct, licenseActive]);
 
-  const triggerStep = async (delta: number, kind: "pulse" | "trunk" | "lock", href?: string) => {
-    if (soundEnabled) playCue(kind === "lock" ? 440 : 220, kind);
-    if (delta > 0) onChargeDelta(delta);
-    onLogEvent("", false);
-
+  const issueRuntimeToken = async () => {
     try {
-      const res = await fetch("/api/module-intel", {
+      const res = await fetch("/api/license-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessKey: "CERRO-OP-2026", moduleCode })
+        body: JSON.stringify({ action: "issue", moduleCode })
       });
       if (res.ok) {
-        const json = await res.json();
-        setBgSpec(json?.spec ?? null);
+        const data = await res.json();
+        if (data?.token) setSessionToken(String(data.token));
       }
     } catch {
       // Background silencioso
     }
+  };
+
+  const triggerStep = async (delta: number, kind: "pulse" | "trunk" | "lock", href?: string) => {
+    if (soundEnabled) playNativeCue(kind === "lock" ? 440 : 220, kind);
+    if (delta > 0) onChargeDelta(delta);
+    onLogEvent("", false);
+
+    if (kind === "lock") {
+      await issueRuntimeToken();
+    }
 
     if (rootRef.current) {
-      rootRef.current.dataset.bgSpec = bgSpec ? "1" : "0";
+      rootRef.current.dataset.tokenReady = sessionToken ? "1" : "0";
       rootRef.current.dispatchEvent(
         new CustomEvent("cerro:media-step", {
           bubbles: true,
@@ -183,37 +200,64 @@ export default function HypermediaModuleDeck({
       data-charge={chargePct}
       data-sdlc={sdlcProgress}
       data-lic={licenseActive ? "1" : "0"}
+      data-has-token={sessionToken ? "1" : "0"}
       className="cerro-glass-panel p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span
-            className={`h-3 w-3 rounded-full `}
-          />
+        <div className="flex items-center gap-2.5">
+          {licenseActive ? (
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+          ) : (
+            <Lock className="h-4 w-4 text-amber-400" />
+          )}
           <div className="h-2.5 w-28 overflow-hidden rounded-full bg-slate-900">
             <div className="cerro-meter-fill" style={{ width: `%` }} />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {(["2d", "svg", "wave"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              aria-label={m}
-              onClick={() => {
-                setMode(m);
-                triggerStep(0, "pulse");
-              }}
-              className={
-                mode === m
-                  ? "cerro-action-btn h-8 w-11 bg-teal-400"
-                  : "cerro-action-btn h-8 w-11 border border-slate-700 bg-slate-900/80"
-              }
-            >
-              <span className="block h-2 w-2 rounded-full bg-current" />
-            </button>
-          ))}
+          <button
+            type="button"
+            aria-label="2d"
+            onClick={() => {
+              setMode("2d");
+              triggerStep(0, "pulse");
+            }}
+            className={cn(
+              "cerro-action-btn h-8 w-10",
+              mode === "2d" ? "bg-teal-400 text-slate-950" : "border border-slate-700 bg-slate-900/80 text-slate-300"
+            )}
+          >
+            <Activity className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label="svg"
+            onClick={() => {
+              setMode("svg");
+              triggerStep(0, "pulse");
+            }}
+            className={cn(
+              "cerro-action-btn h-8 w-10",
+              mode === "svg" ? "bg-teal-400 text-slate-950" : "border border-slate-700 bg-slate-900/80 text-slate-300"
+            )}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label="wave"
+            onClick={() => {
+              setMode("wave");
+              triggerStep(0, "pulse");
+            }}
+            className={cn(
+              "cerro-action-btn h-8 w-10",
+              mode === "wave" ? "bg-teal-400 text-slate-950" : "border border-slate-700 bg-slate-900/80 text-slate-300"
+            )}
+          >
+            <Waves className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
@@ -261,19 +305,19 @@ export default function HypermediaModuleDeck({
           <div className="grid grid-cols-4 gap-2.5">
             <button
               type="button"
-              aria-label="step-5"
+              aria-label="pulse"
               onClick={() => triggerStep(5, "pulse")}
-              className="cerro-action-btn h-11 border border-sky-400/40 bg-sky-500/15"
+              className="cerro-action-btn h-11 border border-sky-400/40 bg-sky-500/15 text-sky-300"
             >
-              <span className="h-3 w-3 rounded-full bg-sky-400" />
+              <Volume2 className="h-4 w-4" />
             </button>
             <button
               type="button"
-              aria-label="step-10"
+              aria-label="trunk"
               onClick={() => triggerStep(10, "trunk")}
-              className="cerro-action-btn h-11 border border-amber-400/40 bg-amber-500/15"
+              className="cerro-action-btn h-11 border border-amber-400/40 bg-amber-500/15 text-amber-300"
             >
-              <span className="h-3 w-3 rotate-45 bg-amber-400" />
+              <Sparkles className="h-4 w-4" />
             </button>
             <a
               href={`/concurso-artistas?`}
@@ -282,9 +326,9 @@ export default function HypermediaModuleDeck({
                 e.preventDefault();
                 triggerStep(0, "lock", `/concurso-artistas?`);
               }}
-              className="cerro-action-btn h-11 border border-emerald-400/40 bg-emerald-500/15"
+              className="cerro-action-btn h-11 border border-emerald-400/40 bg-emerald-500/15 text-emerald-300"
             >
-              <span className="h-3 w-3 rounded-sm bg-emerald-400" />
+              <Unlock className="h-4 w-4" />
             </a>
             <a
               href={`/receita?`}
@@ -293,9 +337,9 @@ export default function HypermediaModuleDeck({
                 e.preventDefault();
                 triggerStep(0, "pulse", `/receita?`);
               }}
-              className="cerro-action-btn h-11 border border-teal-400/40 bg-teal-500/15"
+              className="cerro-action-btn h-11 border border-teal-400/40 bg-teal-500/15 text-teal-300"
             >
-              <span className="h-3 w-3 rounded-full ring-2 ring-teal-300" />
+              <ArrowRight className="h-4 w-4" />
             </a>
           </div>
         </div>
