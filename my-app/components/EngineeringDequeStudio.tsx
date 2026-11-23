@@ -877,7 +877,7 @@ export default function EngineeringDequeStudio({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="cerro-page-shell space-y-6">
       <CerroNavigationHub initialCharge={chargePct} initialModuleCode={selectedNode?.code || `ENG-101`} initialDiscipline={selectedNode?.discipline || `Engenharia Eletrica & Energia`} initialDeliveryMode={activeDelivery} onParamsChange={(p) => { setActiveDelivery((p.deliveryMode as DeliveryMode) || `hibrido`); setChargePct(p.chargePct); }} />
       {/* Cabecalho de Web Design Partilhado entre Engenharias */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
@@ -1382,6 +1382,7 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
 
 
