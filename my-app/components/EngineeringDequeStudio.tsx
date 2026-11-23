@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import RichMediaLayerWorkbench from "./RichMediaLayerWorkbench";
 
 export type DeliveryMode = "disco_console" | "streaming_nuvem" | "hibrido";
 export type SdlcStage =
@@ -1158,6 +1159,17 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
+                        <RichMediaLayerWorkbench
+              moduleCode={selectedNode.code}
+              discipline={selectedNode.discipline}
+              chargePct={chargePct}
+              sdlcProgress={selectedNode.sdlcProgress}
+              licenseActive={selectedNode.licenseActive}
+              soundEnabled={soundEnabled}
+              onChargeDelta={(delta) => handleTrunkChargeTick(delta)}
+              onLogEvent={(msg, playEl) => pushLog(msg, playEl)}
+            />
+
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Comprar do Estoque do Servidor, Baixar e Garantir Licenca em Producao:
@@ -1368,5 +1380,6 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
 
