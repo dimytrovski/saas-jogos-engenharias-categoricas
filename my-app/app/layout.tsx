@@ -1,23 +1,17 @@
-﻿import "./globals.css";
+import "./globals.css";
 import "../styles/cerro-overlays.css";
 import "../styles/cerro-vector-ux.css";
 import "../styles/cerro-gazette-theme.css";
 import type { Metadata } from "next";
-import "../styles/cerro-overlays.css";
-import "../styles/cerro-vector-ux.css";
-import "../styles/cerro-gazette-theme.css";
-import { TelemetryProvider } from './TelemetryContext';
-import "../styles/cerro-overlays.css";
-import "../styles/cerro-vector-ux.css";
-import "../styles/cerro-gazette-theme.css";
+import { TelemetryProvider } from "./TelemetryContext";
 
 export const metadata: Metadata = {
-  title: "Minha Aplicação",
-  description: "Painel com telemetria",
+  title: "SynStrom",
+  description: "SynStrom — Fluxo, Licenciamento e Telemetria"
 };
 
 export default function RootLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
@@ -29,6 +23,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-
-

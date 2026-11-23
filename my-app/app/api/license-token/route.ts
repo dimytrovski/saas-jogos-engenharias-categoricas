@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT, jwtVerify } from "jose";
 
-const getSigningKey = () => {
-  const rawSecret = process.env.CERRO_LICENSE_SECRET || "cerro-gradle-local-dev-secret-change-in-env-2026";
-  return new TextEncoder().encode(rawSecret);
+const getPrimaryKey = () => {
+  const secret =
+    process.env.SYNSTROM_JWT_SECRET ||
+    process.env.JWT_SECRET ||
+    "synstrom-local-dev-secret-change-in-env-2026";
+  return new TextEncoder().encode(secret);
+};
+
+const getLegacyKey = () => {
+  const legacy =
+    process.env.LEGACY_JWT_SECRET ||
+    "cerro-gradle-local-dev-secret-change-in-env-2026";
+  return new TextEncoder().encode(legacy);
 };
 
 export async function POST(req: NextRequest) {
@@ -18,16 +28,31 @@ export async function POST(req: NextRequest) {
       if (!token) {
         return NextResponse.json({ valid: false, reason: "missing_token" }, { status: 400 });
       }
-      const { payload } = await jwtVerify(token, getSigningKey(), {
-        issuer: "cerro-gradle-auth",
-        audience: "cerro-gradle-client"
-      });
-      return NextResponse.json({
-        valid: true,
-        moduleCode: payload.mod,
-        accountRef: payload.sub,
-        exp: payload.exp
-      });
+
+      try {
+        const { payload } = await jwtVerify(token, getPrimaryKey(), {
+          issuer: "synstrom-auth",
+          audience: "synstrom-client"
+        });
+        return NextResponse.json({
+          valid: true,
+          moduleCode: payload.mod,
+          accountRef: payload.sub,
+          exp: payload.exp
+        });
+      } catch {
+        const { payload } = await jwtVerify(token, getLegacyKey(), {
+          issuer: "cerro-gradle-auth",
+          audience: "cerro-gradle-client"
+        });
+        return NextResponse.json({
+          valid: true,
+          moduleCode: payload.mod,
+          accountRef: payload.sub,
+          exp: payload.exp,
+          legacyIssuer: true
+        });
+      }
     }
 
     const token = await new SignJWT({
@@ -37,11 +62,11 @@ export async function POST(req: NextRequest) {
     })
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(accountRef)
-      .setIssuer("cerro-gradle-auth")
-      .setAudience("cerro-gradle-client")
+      .setIssuer("synstrom-auth")
+      .setAudience("synstrom-client")
       .setIssuedAt()
       .setExpirationTime("2h")
-      .sign(getSigningKey());
+      .sign(getPrimaryKey());
 
     return NextResponse.json({
       valid: true,
