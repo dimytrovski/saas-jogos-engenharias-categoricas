@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 
@@ -96,9 +96,7 @@ export default function LicenseAccessPanel() {
   return (
     <section className="mx-auto my-8 max-w-3xl rounded-xl border border-neutral-800 bg-neutral-950 p-6 text-neutral-100 shadow-lg">
       <h2 className="text-xl font-bold tracking-tight">Licenciamento &amp; Acesso Multi-Dispositivo</h2>
-      <p className="mt-1 text-sm text-neutral-400">
-        Solicite uma licenca pendente, simule o pagamento para gerar o token e valide o acesso em qualquer dispositivo.
-      </p>
+      
 
       <form onSubmit={handleRequestLicense} className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -217,7 +215,7 @@ export default function LicenseAccessPanel() {
 
       {validationData && (
         <div className="mt-4 rounded-lg border border-emerald-700/60 bg-emerald-950/30 p-4 text-xs space-y-1">
-          <p className="font-semibold text-emerald-300 text-sm">Transmissao Liberada</p>
+          
           <p><span className="text-neutral-400">Partida:</span> {validationData.match_title} ({validationData.streamer_handle})</p>
           <p><span className="text-neutral-400">Status da Stream:</span> {validationData.stream_status}</p>
           <p><span className="text-neutral-400">Comprador:</span> {validationData.buyer_email}</p>

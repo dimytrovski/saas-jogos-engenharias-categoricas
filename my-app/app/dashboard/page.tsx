@@ -6,7 +6,7 @@ async function ConteudoPosLogin() {
   return (
     <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white">
       <h1 className="text-xl font-bold">Painel pós-login ativo</h1>
-      <p className="text-sm text-slate-400 mt-1">Dados carregados com sucesso.</p>
+      
     </div>
   );
 }
@@ -20,3 +20,4 @@ export default function DashboardPage() {
     </main>
   );
 }
+

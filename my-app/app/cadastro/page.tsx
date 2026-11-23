@@ -122,8 +122,9 @@ export default function CadastroUsuarioPage() {
           {loading ? "Salvando no MySQL..." : "Finalizar Cadastro"}
         </button>
 
-        {mensagem && <p className="text-center text-sm text-sky-400">{mensagem}</p>}
+        {mensagem && null}
       </form>
     </main>
   );
 }
+

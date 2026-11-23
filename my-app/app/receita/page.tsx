@@ -10,15 +10,11 @@ export default function ReceitaAoVivoPage() {
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-teal-600 dark:text-teal-400">
-              Operacao Financeira &amp; Transmissao
-            </p>
+            
             <h1 className="mt-1 text-2xl font-semibold tracking-tight">
               Receita &amp; Conversao ao Vivo
             </h1>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Visao executiva de faturamento por passe, aprovacao de pagamentos e liberacao de acesso.
-            </p>
+            
           </div>
 
           <div className="flex items-center gap-2">
@@ -76,3 +72,4 @@ export default function ReceitaAoVivoPage() {
     </div>
   );
 }
+

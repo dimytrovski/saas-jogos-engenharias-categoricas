@@ -71,7 +71,7 @@ export default function DemostracaoPage() {
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 16 }}>
           <div>
             <h1 style={{ fontSize: 24, margin: 0, fontWeight: 800 }}>Arena Global SaaS</h1>
-            <p style={{ margin: "4px 0 0 0", opacity: 0.7, fontSize: 14 }}>Transmissão Ultra-Low Latency & Lobbies Ativos</p>
+            
           </div>
           <div style={{ display: "flex", gap: 12, background: "rgba(0,0,0,0.4)", padding: "8px 16px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.1)", fontSize: 12 }}>
             <div>🟢 Latência: <strong style={{ color: currentTheme.accentColor }}>{ping}ms</strong></div>
@@ -98,3 +98,4 @@ export default function DemostracaoPage() {
     </main>
   );
 }
+

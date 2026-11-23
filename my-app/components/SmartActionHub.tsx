@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { PLATFORM_CATEGORIES } from "@/data/games";
@@ -20,7 +20,7 @@ interface ActionTelemetry {
 const DEFAULT_TELEMETRY: ActionTelemetry = {
   briefsCopied: 0,
   productivityDispatches: 0,
-  lastActionLabel: "Nenhuma ação registrada ainda",
+  lastActionLabel: "Nenhuma aÃ§Ã£o registrada ainda",
 };
 
 export default function SmartActionHub() {
@@ -65,7 +65,7 @@ export default function SmartActionHub() {
     () =>
       evaluateSmartDecision({
         platform,
-        itemTitle: itemTitle.trim() || "Item sem título",
+        itemTitle: itemTitle.trim() || "Item sem tÃ­tulo",
         urgency,
         budgetBRL: Number.isFinite(budgetBRL) ? Math.max(0, budgetBRL) : 0,
         hasCompatibilityChecked,
@@ -99,21 +99,18 @@ export default function SmartActionHub() {
 
   return (
     <section
-      aria-label="Motor de decisão inteligente e encaminhamento de produtividade"
+      aria-label="Motor de decisÃ£o inteligente e encaminhamento de produtividade"
       className="w-full max-w-6xl mx-auto mt-10 rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-md text-left space-y-6"
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span className="inline-block text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-slate-900 text-white mb-1">
-            Diferencial MicroSaaS • Decisão + Fluxo
+            Diferencial MicroSaaS â€¢ DecisÃ£o + Fluxo
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-            Central de Decisão Inteligente &amp; Encaminhamento
+            Central de DecisÃ£o Inteligente &amp; Encaminhamento
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-            Calcule a viabilidade de compra/ação por plataforma e gere um
-            briefing pronto para sua ferramenta de produtividade.
-          </p>
+          
         </div>
 
         <div className="flex flex-wrap gap-2 text-xs">
@@ -127,13 +124,13 @@ export default function SmartActionHub() {
             <span className="font-bold text-indigo-900">
               {telemetry.productivityDispatches}
             </span>{" "}
-            <span className="text-indigo-700">envios à produtividade</span>
+            <span className="text-indigo-700">envios Ã  produtividade</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Parâmetros de decisão */}
+        {/* ParÃ¢metros de decisÃ£o */}
         <div className="lg:col-span-6 space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
@@ -179,7 +176,7 @@ export default function SmartActionHub() {
                 htmlFor="smart-budget"
                 className="block text-xs font-bold text-slate-700 mb-1"
               >
-                Orçamento disponível (R$)
+                OrÃ§amento disponÃ­vel (R$)
               </label>
               <input
                 id="smart-budget"
@@ -199,7 +196,7 @@ export default function SmartActionHub() {
                 htmlFor="smart-urgency"
                 className="block text-xs font-bold text-slate-700 mb-1"
               >
-                Tipo de intenção
+                Tipo de intenÃ§Ã£o
               </label>
               <select
                 id="smart-urgency"
@@ -220,7 +217,7 @@ export default function SmartActionHub() {
                 onChange={(e) => setHasCompatibilityChecked(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-blue-600"
               />
-              Compatibilidade e edição conferidas
+              Compatibilidade e ediÃ§Ã£o conferidas
             </label>
           </div>
         </div>
@@ -256,7 +253,7 @@ export default function SmartActionHub() {
                 {copiedBrief ? "Briefing copiado!" : "Copiar briefing estruturado"}
               </button>
               <span className="text-[11px] text-slate-400">
-                Última ação: {telemetry.lastActionLabel}
+                Ãšltima aÃ§Ã£o: {telemetry.lastActionLabel}
               </span>
             </div>
 
@@ -272,7 +269,7 @@ export default function SmartActionHub() {
                     onClick={() => handleProductivityDispatch(tool.name, tool.url)}
                     className="rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-1.5 text-xs transition cursor-pointer"
                   >
-                    {tool.name} ↗
+                    {tool.name} â†—
                   </button>
                 ))}
               </div>

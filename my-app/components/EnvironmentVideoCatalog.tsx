@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -87,22 +87,19 @@ export default function EnvironmentVideoCatalog() {
   return (
     <section
       id="catalogo-cenarios-video"
-      aria-label="Catálogo de cenários problemáticos por categoria de ambiente de jogo com player de vídeo"
+      aria-label="CatÃ¡logo de cenÃ¡rios problemÃ¡ticos por categoria de ambiente de jogo com player de vÃ­deo"
       className="w-full max-w-6xl mx-auto mt-10 rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-md text-left space-y-6"
     >
-      {/* Cabeçalho e resumo de cobertura de demanda */}
+      {/* CabeÃ§alho e resumo de cobertura de demanda */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span className="inline-block text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-blue-700 text-white mb-1">
-            Catálogo por Ambiente de Jogo • Player &amp; Viabilidade
+            CatÃ¡logo por Ambiente de Jogo â€¢ Player &amp; Viabilidade
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-            Cenários Problemáticos por Categoria de Ambiente
+            CenÃ¡rios ProblemÃ¡ticos por Categoria de Ambiente
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-            Veja o player demonstrativo para cada cenário problemático e como a
-            estratégia atende a demanda de uso, viabilidade econômica e UX.
-          </p>
+          
         </div>
 
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 shrink-0">
@@ -113,7 +110,7 @@ export default function EnvironmentVideoCatalog() {
             ~{portfolioAvgPct}%{" "}
             <span className="text-xs font-semibold text-emerald-900">
               ({filteredCases.length}{" "}
-              {filteredCases.length === 1 ? "cenário" : "cenários"})
+              {filteredCases.length === 1 ? "cenÃ¡rio" : "cenÃ¡rios"})
             </span>
           </div>
         </div>
@@ -158,7 +155,7 @@ export default function EnvironmentVideoCatalog() {
         })}
       </div>
 
-      {/* Grade principal: seletor de cenários à esquerda + player e impacto à direita */}
+      {/* Grade principal: seletor de cenÃ¡rios Ã  esquerda + player e impacto Ã  direita */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 space-y-2.5">
           {filteredCases.map((item) => {
@@ -186,7 +183,7 @@ export default function EnvironmentVideoCatalog() {
                   {item.problemScenarioTitle}
                 </div>
                 <div className="text-xs text-slate-600 mt-1 line-clamp-2">
-                  Jogo/Contexto: <strong>{item.gameTitle}</strong> —{" "}
+                  Jogo/Contexto: <strong>{item.gameTitle}</strong> â€”{" "}
                   {item.problemSummary}
                 </div>
               </button>
@@ -195,7 +192,7 @@ export default function EnvironmentVideoCatalog() {
         </div>
 
         <div className="lg:col-span-7 space-y-4">
-          {/* Player de vídeo */}
+          {/* Player de vÃ­deo */}
           <div className="rounded-2xl bg-slate-950 text-white overflow-hidden border border-slate-800 shadow">
             <div className="relative aspect-video w-full bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 flex flex-col justify-between p-4 sm:p-5">
               {currentCase.videoSrc ? (
@@ -213,7 +210,7 @@ export default function EnvironmentVideoCatalog() {
                 <>
                   <div className="flex items-center justify-between gap-2 z-10">
                     <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded bg-white/10 text-sky-300">
-                      {currentCase.environmentCategory} • {currentCase.gameTitle}
+                      {currentCase.environmentCategory} â€¢ {currentCase.gameTitle}
                     </span>
                     <span className="text-xs font-mono text-slate-300 bg-black/40 px-2 py-0.5 rounded">
                       {currentCase.videoDuration}
@@ -233,7 +230,7 @@ export default function EnvironmentVideoCatalog() {
                         onClick={handleTogglePlay}
                         className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-4 py-2 text-xs sm:text-sm transition cursor-pointer shadow"
                       >
-                        <span>{isPlayingDemo ? "Pausar Demonstração" : "Reproduzir Demonstração"}</span>
+                        <span>{isPlayingDemo ? "Pausar DemonstraÃ§Ã£o" : "Reproduzir DemonstraÃ§Ã£o"}</span>
                       </button>
                     </div>
                   </div>
@@ -273,27 +270,27 @@ export default function EnvironmentVideoCatalog() {
                   onClick={handleToggleMute}
                   className="rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-3 py-1.5 text-xs transition cursor-pointer"
                 >
-                  {isMuted ? "Sem áudio" : "Áudio ativo"}
+                  {isMuted ? "Sem Ã¡udio" : "Ãudio ativo"}
                 </button>
               </div>
               <span className="text-[11px] text-slate-400">
-                Coloque um MP4 em <code className="text-slate-200">public/videos/</code> se quiser vídeo real local
+                Coloque um MP4 em <code className="text-slate-200">public/videos/</code> se quiser vÃ­deo real local
               </span>
             </div>
 
             <div className="bg-slate-950 px-4 py-3 border-t border-slate-800/80">
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                Etapas demonstradas no cenário
+                Etapas demonstradas no cenÃ¡rio
               </div>
               <ul className="space-y-1 text-xs text-slate-300">
                 {currentCase.sceneHighlights.map((step) => (
-                  <li key={step}>• {step}</li>
+                  <li key={step}>â€¢ {step}</li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Como resolve demanda, viabilidade econômica e UX */}
+          {/* Como resolve demanda, viabilidade econÃ´mica e UX */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3.5">
               <div className="text-[11px] font-extrabold uppercase text-emerald-900 mb-1">
@@ -302,15 +299,12 @@ export default function EnvironmentVideoCatalog() {
               <div className="text-lg font-black text-emerald-700">
                 {currentCase.useCaseDemandSolvedPct}% resolvido
               </div>
-              <p className="text-xs text-emerald-950/85 mt-1">
-                Atende à maior parcela das interações recorrentes deste
-                ambiente sem inflar a interface.
-              </p>
+              
             </div>
 
             <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5">
               <div className="text-[11px] font-extrabold uppercase text-amber-900 mb-1">
-                Viabilidade Econômica
+                Viabilidade EconÃ´mica
               </div>
               <div className="text-sm font-extrabold text-amber-950">
                 {currentCase.estimatedMonthlySavingsBRL}
@@ -322,10 +316,10 @@ export default function EnvironmentVideoCatalog() {
 
             <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5">
               <div className="text-[11px] font-extrabold uppercase text-blue-900 mb-1">
-                Experiência do Usuário (UX)
+                ExperiÃªncia do UsuÃ¡rio (UX)
               </div>
               <div className="text-sm font-extrabold text-blue-950">
-                Clareza em 1 visualização
+                Clareza em 1 visualizaÃ§Ã£o
               </div>
               <p className="text-xs text-blue-950/85 mt-1">
                 {currentCase.uxImprovementSummary}

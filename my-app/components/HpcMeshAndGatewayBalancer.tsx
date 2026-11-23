@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo, useState } from "react";
 import {
@@ -29,7 +29,7 @@ export default function HpcMeshAndGatewayBalancer() {
     UPSTREAM_BALANCER_TARGETS[2].id
   );
   const [geoInput, setGeoInput] = useState<string>(
-    "Macapá / Brasil, São Paulo, Miami, Lisboa"
+    "MacapÃ¡ / Brasil, SÃ£o Paulo, Miami, Lisboa"
   );
   const [loading, setLoading] = useState<boolean>(false);
   const [pinging, setPinging] = useState<boolean>(false);
@@ -121,30 +121,26 @@ export default function HpcMeshAndGatewayBalancer() {
   return (
     <section
       id="malha-hpc-ptt-balanceador"
-      aria-label="Servidores de baixa latência HPC, múltiplas réplicas, PTTs e balanceador com servidores externos"
+      aria-label="Servidores de baixa latÃªncia HPC, mÃºltiplas rÃ©plicas, PTTs e balanceador com servidores externos"
       className="w-full max-w-6xl mx-auto mt-10 rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-md text-left space-y-6"
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <span className="inline-block text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-cyan-800 text-white mb-1">
-            Baixa Latência • HPC • Réplicas &amp; PTTs • Balanceador
+            Baixa LatÃªncia â€¢ HPC â€¢ RÃ©plicas &amp; PTTs â€¢ Balanceador
           </span>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-            Malha de Réplicas, PTTs e Balanceamento com Servidores e APIs
+            Malha de RÃ©plicas, PTTs e Balanceamento com Servidores e APIs
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-            Aproxima jogadores de diferentes geografias a nós próximos de PTTs,
-            balanceia rotas com ecossistemas como EA, Ubisoft e servidores
-            independentes, e protege sua liberdade e tranquilidade.
-          </p>
+          
         </div>
 
         <div className="rounded-xl bg-slate-950 text-white px-4 py-2.5 text-xs shrink-0 space-y-1">
           <div className="font-bold uppercase tracking-wider text-cyan-400">
-            Réplicas Ativas na Malha
+            RÃ©plicas Ativas na Malha
           </div>
           <div className="text-xl font-black text-white">
-            {totalReplicas} réplicas{" "}
+            {totalReplicas} rÃ©plicas{" "}
             <span className="text-xs font-semibold text-emerald-400">
               (~{activeNode.baseLatencyMs}ms base)
             </span>
@@ -157,11 +153,11 @@ export default function HpcMeshAndGatewayBalancer() {
         </div>
       </div>
 
-      {/* Seleção de Nó PTT/Réplica + Balanceador Upstream + Geografias */}
+      {/* SeleÃ§Ã£o de NÃ³ PTT/RÃ©plica + Balanceador Upstream + Geografias */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-7 space-y-3">
           <div className="text-xs font-extrabold uppercase tracking-wide text-slate-800">
-            1. Selecione o Nó Próximo a PTT &amp; Réplicas HPC
+            1. Selecione o NÃ³ PrÃ³ximo a PTT &amp; RÃ©plicas HPC
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {PTT_REPLICA_NODES.map((node) => {
@@ -189,7 +185,7 @@ export default function HpcMeshAndGatewayBalancer() {
                     {node.pttOrIxReference}
                   </div>
                   <div className="text-[11px] text-slate-600 mt-0.5">
-                    {node.replicasCount} réplicas • {node.hpcComputeTier}
+                    {node.replicasCount} rÃ©plicas â€¢ {node.hpcComputeTier}
                   </div>
                 </button>
               );
@@ -201,7 +197,7 @@ export default function HpcMeshAndGatewayBalancer() {
               htmlFor="multi-geo-input"
               className="block text-xs font-extrabold text-slate-800 mb-1"
             >
-              Geografias dos jogadores conectados (separadas por vírgula)
+              Geografias dos jogadores conectados (separadas por vÃ­rgula)
             </label>
             <input
               id="multi-geo-input"
@@ -222,7 +218,7 @@ export default function HpcMeshAndGatewayBalancer() {
               htmlFor="upstream-balancer-select"
               className="block text-[11px] text-slate-300"
             >
-              Alvo / Perfil de Integração
+              Alvo / Perfil de IntegraÃ§Ã£o
             </label>
             <select
               id="upstream-balancer-select"
@@ -241,7 +237,7 @@ export default function HpcMeshAndGatewayBalancer() {
               <div className="font-bold text-sky-300">{activeUpstream.name}</div>
               <div className="text-slate-300">{activeUpstream.integrationMode}</div>
               <div className="text-[11px] text-emerald-400">
-                Estado: {activeUpstream.healthStatus} • Peso: {activeUpstream.weightPct}%
+                Estado: {activeUpstream.healthStatus} â€¢ Peso: {activeUpstream.weightPct}%
               </div>
             </div>
           </div>
@@ -254,8 +250,8 @@ export default function HpcMeshAndGatewayBalancer() {
               className="w-full rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-60 text-white font-extrabold py-2.5 px-4 text-xs sm:text-sm transition cursor-pointer"
             >
               {loading
-                ? "Calculando rota de alta precisão..."
-                : "Otimizar Rota, Réplicas & Balanceamento"}
+                ? "Calculando rota de alta precisÃ£o..."
+                : "Otimizar Rota, RÃ©plicas & Balanceamento"}
             </button>
 
             <button
@@ -266,7 +262,7 @@ export default function HpcMeshAndGatewayBalancer() {
             >
               {pinging
                 ? "Medindo ping real (3 amostras)..."
-                : "Medir Latência Real no Navegador (3x)"}
+                : "Medir LatÃªncia Real no Navegador (3x)"}
             </button>
           </div>
         </div>
@@ -289,11 +285,11 @@ export default function HpcMeshAndGatewayBalancer() {
       {realPing && (
         <div className="rounded-xl bg-cyan-950 text-cyan-100 border border-cyan-800 p-4 text-xs space-y-1">
           <div className="font-extrabold uppercase tracking-wider text-cyan-300">
-            Medição Real no Navegador • {realPing.measuredAt}
+            MediÃ§Ã£o Real no Navegador â€¢ {realPing.measuredAt}
           </div>
           <p>
-            <strong>Média RTT real (navegador ↔ servidor):</strong>{" "}
-            <span className="text-white font-black">{realPing.rttMs} ms</span> •{" "}
+            <strong>MÃ©dia RTT real (navegador â†” servidor):</strong>{" "}
+            <span className="text-white font-black">{realPing.rttMs} ms</span> â€¢{" "}
             <strong>Amostras:</strong>{" "}
             <span className="font-mono">{realPing.samplesMs.join(" ms, ")} ms</span>
           </p>
@@ -303,19 +299,19 @@ export default function HpcMeshAndGatewayBalancer() {
       {calcResult && (
         <div className="rounded-xl bg-slate-950 text-white p-4 text-xs space-y-1.5">
           <div className="font-extrabold uppercase tracking-wider text-emerald-400">
-            Rota HPC &amp; PTT Validada • {calcResult.routeId}
+            Rota HPC &amp; PTT Validada â€¢ {calcResult.routeId}
           </div>
           <p>
-            <strong>Precisão estimada de roteamento:</strong>{" "}
+            <strong>PrecisÃ£o estimada de roteamento:</strong>{" "}
             <span className="text-cyan-300 font-black">
               {calcResult.routingPrecisionPct}%
             </span>{" "}
-            • <strong>Geografias alinhadas:</strong>{" "}
-            {calcResult.connectedGeographies.join(" • ")}
+            â€¢ <strong>Geografias alinhadas:</strong>{" "}
+            {calcResult.connectedGeographies.join(" â€¢ ")}
           </p>
           <p className="text-slate-300">{calcResult.guidance}</p>
           <p className="text-[11px] text-amber-300">
-            Prudência &amp; Paz: {activeNode.peaceAndPrudenceNote}
+            PrudÃªncia &amp; Paz: {activeNode.peaceAndPrudenceNote}
           </p>
         </div>
       )}

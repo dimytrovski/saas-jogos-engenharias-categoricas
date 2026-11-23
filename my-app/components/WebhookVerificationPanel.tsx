@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 
@@ -72,21 +72,18 @@ export default function WebhookVerificationPanel() {
   return (
     <section
       id="verificacao-webhook-seguro"
-      aria-label="Validação de webhook seguro com assinatura HMAC e idempotência"
+      aria-label="ValidaÃ§Ã£o de webhook seguro com assinatura HMAC e idempotÃªncia"
       className="w-full max-w-6xl mx-auto mt-10 rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6 shadow-md text-left space-y-5"
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
           <span className="inline-block text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-emerald-800 text-white mb-1">
-            Auditoria Real • HMAC SHA-256 &amp; Idempotência
+            Auditoria Real â€¢ HMAC SHA-256 &amp; IdempotÃªncia
           </span>
           <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">
-            Confirmação Antifraude de Pagamentos via Webhook (/api/webhooks/payment)
+            ConfirmaÃ§Ã£o Antifraude de Pagamentos via Webhook (/api/webhooks/payment)
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-            Testa confirmação autenticada no servidor, bloqueio de assinatura
-            inválida e proteção contra reenvio duplicado do mesmo eventId.
-          </p>
+          
         </div>
 
         <div className="rounded-xl bg-slate-950 text-white px-3.5 py-2 text-xs shrink-0">
@@ -135,7 +132,7 @@ export default function WebhookVerificationPanel() {
             htmlFor="wh-method"
             className="block text-xs font-extrabold text-slate-800 mb-1"
           >
-            Método
+            MÃ©todo
           </label>
           <select
             id="wh-method"
@@ -144,10 +141,10 @@ export default function WebhookVerificationPanel() {
             className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900"
           >
             <option value="Pix">Pix</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="CartÃ£o de CrÃ©dito">CartÃ£o de CrÃ©dito</option>
+            <option value="CartÃ£o de DÃ©bito">CartÃ£o de DÃ©bito</option>
             <option value="TED">TED</option>
-            <option value="Boleto Bancário">Boleto Bancário</option>
+            <option value="Boleto BancÃ¡rio">Boleto BancÃ¡rio</option>
           </select>
         </div>
       </div>
@@ -159,7 +156,7 @@ export default function WebhookVerificationPanel() {
           disabled={sending}
           className="rounded-xl bg-emerald-700 hover:bg-emerald-600 disabled:opacity-60 text-white font-extrabold px-4 py-2.5 text-xs transition cursor-pointer"
         >
-          {sending ? "Enviando..." : "Simular Webhook Assinado (Válido / Idempotente)"}
+          {sending ? "Enviando..." : "Simular Webhook Assinado (VÃ¡lido / Idempotente)"}
         </button>
 
         <button
@@ -168,7 +165,7 @@ export default function WebhookVerificationPanel() {
           disabled={sending}
           className="rounded-xl bg-rose-700 hover:bg-rose-600 disabled:opacity-60 text-white font-extrabold px-4 py-2.5 text-xs transition cursor-pointer"
         >
-          {sending ? "Enviando..." : "Simular Assinatura Inválida (Teste Antifraude)"}
+          {sending ? "Enviando..." : "Simular Assinatura InvÃ¡lida (Teste Antifraude)"}
         </button>
       </div>
 
@@ -181,7 +178,7 @@ export default function WebhookVerificationPanel() {
           }`}
         >
           <div className="font-extrabold uppercase tracking-wider text-emerald-400">
-            Resposta do Servidor • {lastResult.ok ? "ACEITO" : "REJEITADO"}
+            Resposta do Servidor â€¢ {lastResult.ok ? "ACEITO" : "REJEITADO"}
           </div>
           <p>{lastResult.message || lastResult.error}</p>
           {lastResult.eventId && (

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -59,7 +59,7 @@ export default function HeroIntroWithRandomBg() {
 
   return (
     <section
-      aria-label="Introdução temática automática de jogos e plataformas"
+      aria-label="IntroduÃ§Ã£o temÃ¡tica automÃ¡tica de jogos e plataformas"
       onMouseEnter={() => setIsPausedByHover(true)}
       onMouseLeave={() => setIsPausedByHover(false)}
       className="relative w-full max-w-6xl mx-auto overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 text-white shadow-2xl"
@@ -98,18 +98,14 @@ export default function HeroIntroWithRandomBg() {
           Simplifique Sua Rotina e Capte Jogadores
         </h1>
 
-        <p className="text-base sm:text-lg md:text-xl text-gray-200 max-w-2xl mb-8">
-          Organize seus links de divulgação por plataforma, atraia mais
-          jogadores e acelere o crescimento do seu projeto em Xbox, PlayStation,
-          Nintendo, Windows e Mac.
-        </p>
+        
 
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8">
           <Link
             href="/proxima-pagina"
             className="bg-blue-600 text-white px-7 py-3.5 rounded-lg font-semibold text-base hover:bg-blue-500 transition shadow-lg"
           >
-            Começar Agora
+            ComeÃ§ar Agora
           </Link>
 
           <button
@@ -117,7 +113,7 @@ export default function HeroIntroWithRandomBg() {
             onClick={handleNextTheme}
             className="bg-white/15 text-white px-5 py-3.5 rounded-lg font-medium text-sm border border-white/25 hover:bg-white/25 transition cursor-pointer"
           >
-            Trocar cenário agora
+            Trocar cenÃ¡rio agora
           </button>
 
           <button

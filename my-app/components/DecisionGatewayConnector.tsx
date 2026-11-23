@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo, useState } from "react";
 import {
@@ -54,12 +54,12 @@ export default function DecisionGatewayConnector() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setErrorMsg(data.error || "Falha ao preparar conexão segura.");
+        setErrorMsg(data.error || "Falha ao preparar conexÃ£o segura.");
       } else {
         setSessionResult(data);
       }
     } catch {
-      setErrorMsg("Erro de rede ao conectar à rota segura de decisão.");
+      setErrorMsg("Erro de rede ao conectar Ã  rota segura de decisÃ£o.");
     } finally {
       setLoading(false);
     }
@@ -70,15 +70,12 @@ export default function DecisionGatewayConnector() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
           <span className="inline-block text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-blue-700 text-white mb-1">
-            Conexão Segura com Gateways • Central de Decisão Inteligente
+            ConexÃ£o Segura com Gateways â€¢ Central de DecisÃ£o Inteligente
           </span>
           <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
             Roteador Seguro de Gateways para BRL e Escala Global
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-            Seleciona os gateways ideais conforme o perfil do comprador e o método,
-            mantendo dados de recebimento encapsulados no servidor.
-          </p>
+          
         </div>
 
         <button
@@ -87,11 +84,11 @@ export default function DecisionGatewayConnector() {
           disabled={loading}
           className="rounded-xl bg-emerald-700 hover:bg-emerald-600 disabled:opacity-60 text-white font-extrabold px-4 py-2.5 text-xs sm:text-sm transition cursor-pointer shrink-0"
         >
-          {loading ? "Preparando..." : "Gerar Sessão Encapsulada"}
+          {loading ? "Preparando..." : "Gerar SessÃ£o Encapsulada"}
         </button>
       </div>
 
-      {/* Filtros de perfil do comprador, método e plano */}
+      {/* Filtros de perfil do comprador, mÃ©todo e plano */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label
@@ -106,9 +103,9 @@ export default function DecisionGatewayConnector() {
             onChange={(e) => setScope(e.target.value as GatewayBuyerScope)}
             className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900"
           >
-            <option value="misto_global_brl">Global + Brasil (Conversão/Liquidação BRL)</option>
-            <option value="brasil_brl">Foco Brasil (Pix, Boleto, Cartão e TED em BRL)</option>
-            <option value="global_fx">Internacional / FX (Cartões Globais)</option>
+            <option value="misto_global_brl">Global + Brasil (ConversÃ£o/LiquidaÃ§Ã£o BRL)</option>
+            <option value="brasil_brl">Foco Brasil (Pix, Boleto, CartÃ£o e TED em BRL)</option>
+            <option value="global_fx">Internacional / FX (CartÃµes Globais)</option>
           </select>
         </div>
 
@@ -117,7 +114,7 @@ export default function DecisionGatewayConnector() {
             htmlFor="gateway-method-select"
             className="block text-xs font-extrabold text-slate-800 mb-1"
           >
-            Método de pagamento
+            MÃ©todo de pagamento
           </label>
           <select
             id="gateway-method-select"
@@ -138,7 +135,7 @@ export default function DecisionGatewayConnector() {
             htmlFor="gateway-plan-select"
             className="block text-xs font-extrabold text-slate-800 mb-1"
           >
-            Plano / referência de valor
+            Plano / referÃªncia de valor
           </label>
           <select
             id="gateway-plan-select"
@@ -146,8 +143,8 @@ export default function DecisionGatewayConnector() {
             onChange={(e) => setPlanName(e.target.value)}
             className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900"
           >
-            <option value="Pro Fluxo (R$ 24,90)">Pro Fluxo — R$ 24,90/mês</option>
-            <option value="Founder Vitalício (R$ 89)">Founder Vitalício — R$ 89 único</option>
+            <option value="Pro Fluxo (R$ 24,90)">Pro Fluxo â€” R$ 24,90/mÃªs</option>
+            <option value="Founder VitalÃ­cio (R$ 89)">Founder VitalÃ­cio â€” R$ 89 Ãºnico</option>
           </select>
         </div>
       </div>
@@ -171,13 +168,13 @@ export default function DecisionGatewayConnector() {
               <strong>Ideal para:</strong> {gw.recommendedFor}
             </p>
             <p className="text-xs text-slate-700">
-              <strong>Métodos:</strong> {gw.supportedMethods.join(" • ")}
+              <strong>MÃ©todos:</strong> {gw.supportedMethods.join(" â€¢ ")}
             </p>
             <p className="text-xs text-slate-700">
-              <strong>BRL / Conversão:</strong> {gw.brlSettlementNotes}
+              <strong>BRL / ConversÃ£o:</strong> {gw.brlSettlementNotes}
             </p>
             <p className="text-xs text-emerald-950 bg-emerald-50 border border-emerald-200 rounded-lg p-2">
-              <strong>Proteção:</strong> {gw.securityControl}
+              <strong>ProteÃ§Ã£o:</strong> {gw.securityControl}
             </p>
           </div>
         ))}
@@ -192,16 +189,16 @@ export default function DecisionGatewayConnector() {
       {sessionResult && (
         <div className="rounded-xl bg-slate-950 text-white p-4 text-xs space-y-1">
           <div className="font-extrabold uppercase tracking-wider text-emerald-400">
-            Sessão Encapsulada Gerada no Servidor
+            SessÃ£o Encapsulada Gerada no Servidor
           </div>
           <p>
-            <strong>Referência:</strong>{" "}
-            <code className="text-sky-300">{sessionResult.sessionReference}</code> •{" "}
+            <strong>ReferÃªncia:</strong>{" "}
+            <code className="text-sky-300">{sessionResult.sessionReference}</code> â€¢{" "}
             <strong>Destino:</strong>{" "}
             <code className="text-emerald-300">{sessionResult.settlementVault}</code>
           </p>
           <p>
-            <strong>Liquidação estimada:</strong>{" "}
+            <strong>LiquidaÃ§Ã£o estimada:</strong>{" "}
             {sessionResult.estimatedAmountBrl.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",

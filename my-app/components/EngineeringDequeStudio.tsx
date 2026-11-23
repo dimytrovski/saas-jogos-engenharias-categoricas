@@ -899,9 +899,7 @@ export default function EngineeringDequeStudio({
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
               Cerro-Gradle: Identidade Visual em Web Design, Cabo Trifasico na Tromba e Licenca de Producao
             </h1>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Visual customizado para web design a partir da silhueta frontal do elefante e partilhado entre as engenharias. Toque na tromba trifasica para carregar o corpo, emitir o som e salvar missoes e legados no banco.
-            </p>
+            
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -1273,9 +1271,7 @@ export default function EngineeringDequeStudio({
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
             <h3 className="text-sm font-semibold">Telemetria do Deque &amp; Licencas</h3>
-            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-              Eventos de contato trifasico, compras e licencas.
-            </p>
+            
             <div className="mt-3 max-h-120 space-y-2 overflow-y-auto pr-1 font-mono text-[11px]">
               {eventLog.map((entry, i) => (
                 <div
@@ -1300,9 +1296,7 @@ export default function EngineeringDequeStudio({
             <h2 className="text-lg font-semibold">
               Missoes, Desafios e Legados Conquistados no Aplicativo
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Derivados naturalmente da interacao humana com a tromba trifasica, compras/downloads, SDLC e gravados na tabela engineering_deque_progress.
-            </p>
+            
           </div>
           <button
             type="button"
@@ -1347,10 +1341,7 @@ export default function EngineeringDequeStudio({
             Historico Gravado no Banco de Dados ({dbRecords.length} registros):
           </div>
           {dbRecords.length === 0 ? (
-            <p className="text-xs text-zinc-500">
-              Interaja com a tromba trifasica, compre/baixe ou avance o SDLC para gravar novos registros no banco.
-            </p>
-          ) : (
+            null) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left font-mono text-[11px]">
                 <thead>
@@ -1382,6 +1373,9 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
+
+
 
 
 

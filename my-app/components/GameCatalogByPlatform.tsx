@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -55,17 +55,14 @@ export default function GameCatalogByPlatform() {
 
   return (
     <section
-      aria-label="Catálogo de jogos por plataforma com oportunidades e produtividade"
+      aria-label="CatÃ¡logo de jogos por plataforma com oportunidades e produtividade"
       className="w-full max-w-6xl mx-auto mt-10"
     >
       <div className="mb-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
           Oportunidades por Plataforma &amp; Produtividade
         </h2>
-        <p className="text-sm sm:text-base text-gray-600 mt-1">
-          Filtre por plataforma, escolha uma oportunidade de compra inteligente e
-          encaminhe sua rotina para sua ferramenta de produtividade.
-        </p>
+        
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
@@ -171,14 +168,14 @@ export default function GameCatalogByPlatform() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition"
                         >
-                          Acessar {activeOpp.storeName} ↗
+                          Acessar {activeOpp.storeName} â†—
                         </a>
                       ) : (
                         <Link
                           href={activeOpp.url}
                           className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition"
                         >
-                          Abrir {activeOpp.storeName} →
+                          Abrir {activeOpp.storeName} â†’
                         </Link>
                       )}
 
@@ -209,7 +206,7 @@ export default function GameCatalogByPlatform() {
                           className="flex flex-col rounded-lg bg-white px-3 py-2 border border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
                         >
                           <span className="text-xs font-bold text-indigo-700">
-                            {dest.toolName} ↗
+                            {dest.toolName} â†—
                           </span>
                           <span className="text-[11px] text-gray-600">
                             {dest.purpose}

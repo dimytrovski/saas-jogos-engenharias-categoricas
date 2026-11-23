@@ -23,9 +23,7 @@ export default function CloudGamingSkeleton() {
           <rect x="110" y="124" width="40" height="18" rx="6" fill="#1e293b" stroke="#818cf8" />
           <rect x="185" y="122" width="40" height="18" rx="6" fill="#1e293b" stroke="#a855f7" />
         </svg>
-        <p className="mt-2 text-xs uppercase tracking-wider text-sky-400 animate-pulse">
-          Sincronizando sinais dos periféricos na nuvem...
-        </p>
+        
       </div>
 
       <div className="space-y-3 animate-pulse">
@@ -36,3 +34,4 @@ export default function CloudGamingSkeleton() {
     </div>
   );
 }
+

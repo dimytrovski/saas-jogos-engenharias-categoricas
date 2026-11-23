@@ -387,9 +387,7 @@ export default function ProgressDigestPanel(props: ProgressDigestPanelProps) {
 
       <section style={{ border: "1px solid #cbd5e1", borderRadius: 12, padding: 20, background: "#ffffff" }}>
         <h2 style={{ margin: "0 0 6px" }}>Agendamento &amp; Identidade do Progress Digest</h2>
-        <p style={{ margin: "0 0 16px", color: "#475569", fontSize: 14 }}>
-          Configure dia/mes/ano e hora de envio, identidade da conta/marca, envio por e-mail padrao e aceite de plano de adaptacao.
-        </p>
+        
 
         <form onSubmit={handleCreateSchedule} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
           <label style={{ display: "grid", gap: 4, fontSize: 13 }}>
@@ -485,8 +483,8 @@ export default function ProgressDigestPanel(props: ProgressDigestPanelProps) {
           </div>
         </form>
 
-        {feedback && <p style={{ marginTop: 12, color: "#15803d", fontWeight: 600 }}>{feedback}</p>}
-        {errorMsg && <p style={{ marginTop: 12, color: "#b91c1c", fontWeight: 600 }}>{errorMsg}</p>}
+        {feedback && null}
+        {errorMsg && null}
       </section>
 
       <section style={{ border: "1px solid #cbd5e1", borderRadius: 12, padding: 20, background: "#ffffff" }}>
@@ -564,3 +562,4 @@ export default function ProgressDigestPanel(props: ProgressDigestPanelProps) {
     </div>
   );
 }
+
