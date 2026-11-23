@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import CerroNavigationHub from "./CerroNavigationHub";
 import RichMediaLayerWorkbench from "./RichMediaLayerWorkbench";
 
 export type DeliveryMode = "disco_console" | "streaming_nuvem" | "hibrido";
@@ -877,6 +878,7 @@ export default function EngineeringDequeStudio({
 
   return (
     <div className="space-y-6">
+      <CerroNavigationHub initialCharge={chargePct} initialModuleCode={selectedNode?.code || `ENG-101`} initialDiscipline={selectedNode?.discipline || `Engenharia Eletrica & Energia`} initialDeliveryMode={activeDelivery} onParamsChange={(p) => { setActiveDelivery((p.deliveryMode as DeliveryMode) || `hibrido`); setChargePct(p.chargePct); }} />
       {/* Cabecalho de Web Design Partilhado entre Engenharias */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
@@ -1380,6 +1382,7 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
 
 

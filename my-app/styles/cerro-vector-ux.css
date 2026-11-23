@@ -1,0 +1,45 @@
+﻿/* ==========================================================================
+   CERRO-GRADLE · VETORIZACAO GRAFICA & SUPERACAO MIDIATICA
+   ========================================================================== */
+.cerro-vector-stage {
+  position: relative;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(45, 212, 191, 0.11), transparent 62%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(148, 163, 184, 0.04) 0px,
+      rgba(148, 163, 184, 0.04) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.04) 0px,
+      rgba(148, 163, 184, 0.04) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    #050a12;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.cerro-svg-animated-dash {
+  stroke-dasharray: 8 6;
+  animation: cerroPhaseRing 4.5s linear infinite;
+}
+
+.cerro-vector-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: rgba(15, 23, 42, 0.8);
+  color: #99f6e4;
+}

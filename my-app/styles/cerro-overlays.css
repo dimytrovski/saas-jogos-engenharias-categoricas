@@ -1,0 +1,90 @@
+﻿/* ==========================================================================
+   CERRO-GRADLE · OVERLAYS DIGITAIS ANIMADOS & UX ADAPTATIVA
+   ========================================================================== */
+:root {
+  --cerro-phi: 1.61803398875;
+  --cerro-phase-r: #ef4444;
+  --cerro-phase-s: #f59e0b;
+  --cerro-phase-t: #38bdf8;
+  --cerro-accent: #2dd4bf;
+  --cerro-surface: rgba(10, 17, 29, 0.86);
+  --cerro-border: rgba(45, 212, 191, 0.28);
+  --cerro-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes cerroFloatDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -3px, 0) scale(1.012);
+  }
+}
+
+@keyframes cerroScanSweep {
+  0% {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(130%);
+    opacity: 0;
+  }
+}
+
+@keyframes cerroPhaseRing {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -120;
+  }
+}
+
+.cerro-nav-bar {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(11, 19, 32, 0.94), rgba(17, 29, 48, 0.9));
+  border: 1px solid var(--cerro-border);
+  transition: border-color 0.25s var(--cerro-ease), box-shadow 0.25s var(--cerro-ease);
+}
+
+.cerro-nav-bar:hover {
+  border-color: rgba(45, 212, 191, 0.55);
+  box-shadow: 0 12px 32px -12px rgba(45, 212, 191, 0.22);
+}
+
+.cerro-overlay-pill {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s var(--cerro-ease), background-color 0.22s var(--cerro-ease), border-color 0.22s var(--cerro-ease);
+}
+
+.cerro-overlay-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.cerro-overlay-pill:hover {
+  transform: translateY(-1px);
+}
+
+.cerro-overlay-pill:hover::after {
+  animation: cerroScanSweep 0.75s var(--cerro-ease);
+}
+
+.cerro-adaptive-overlay {
+  animation: cerroFloatDrift 5.5s ease-in-out infinite;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.14), transparent 58%),
+              linear-gradient(180deg, rgba(12, 20, 34, 0.92), rgba(7, 12, 21, 0.96));
+}
