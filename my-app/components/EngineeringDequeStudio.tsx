@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import CerroNavigationHub from "./CerroNavigationHub";
-import RichMediaLayerWorkbench from "./RichMediaLayerWorkbench";
+import HypermediaModuleDeck from "./HypermediaModuleDeck";
 
 export type DeliveryMode = "disco_console" | "streaming_nuvem" | "hibrido";
 export type SdlcStage =
@@ -1161,7 +1161,7 @@ export default function EngineeringDequeStudio({
               </div>
             </div>
 
-                        <RichMediaLayerWorkbench
+                        <HypermediaModuleDeck
               moduleCode={selectedNode.code}
               discipline={selectedNode.discipline}
               chargePct={chargePct}
@@ -1382,6 +1382,7 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
 
 
