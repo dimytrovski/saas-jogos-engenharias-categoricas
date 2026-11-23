@@ -892,6 +892,7 @@ export default function EngineeringDequeStudio({
               </span>
               <span className="text-xs text-zinc-500">SSR: {serverRenderedAt}</span>
             </div>
+            <div className="mb-1"><a href="/concurso-artistas" className="inline-block rounded border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-amber-700 hover:bg-amber-500/20 dark:text-amber-300">Acessar Cofre do Concurso &amp; Jornais (Participantes) &rarr;</a></div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
               Cerro-Gradle: Identidade Visual em Web Design, Cabo Trifasico na Tromba e Licenca de Producao
             </h1>
@@ -1367,4 +1368,5 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
