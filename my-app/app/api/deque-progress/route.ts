@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db-query";
+import { executeWithRetry as runDbQuery, parseDbError } from "@/lib/db-query";
 
 export const dynamic = "force-dynamic";
 
@@ -20,17 +20,25 @@ CREATE TABLE IF NOT EXISTS engineering_deque_progress (
 
 export async function GET() {
   try {
-    await query(CREATE_TABLE_SQL);
-    const rows = await query<Record<string, unknown>[]>(
+    await runDbQuery(CREATE_TABLE_SQL);
+    const rows = await runDbQuery(
       "SELECT id, module_code, event_type, charge_pct, delivery_mode, mission_title, challenge_title, legacy_title, raw_payload, created_at FROM engineering_deque_progress ORDER BY id DESC LIMIT 25"
     );
     return NextResponse.json({
       persisted: true,
       storage: "mariadb",
-      records: rows
+      records: Array.isArray(rows) ? rows : []
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro ao consultar MariaDB";
+    const parsed = typeof parseDbError === "function" ? parseDbError(err) : err;
+    const message =
+      parsed instanceof Error
+        ? parsed.message
+        : typeof parsed === "string"
+          ? parsed
+          : err instanceof Error
+            ? err.message
+            : "Erro ao consultar MariaDB";
     return NextResponse.json(
       {
         persisted: false,
@@ -61,8 +69,8 @@ export async function POST(req: NextRequest) {
     ).slice(0, 160);
     const rawPayload = JSON.stringify(body.rawPayload ?? body).slice(0, 4000);
 
-    await query(CREATE_TABLE_SQL);
-    const result = await query<{ insertId?: number }>(
+    await runDbQuery(CREATE_TABLE_SQL);
+    const result = await runDbQuery(
       `INSERT INTO engineering_deque_progress
         (module_code, event_type, charge_pct, delivery_mode, mission_title, challenge_title, legacy_title, raw_payload)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -82,10 +90,18 @@ export async function POST(req: NextRequest) {
       ok: true,
       persisted: true,
       storage: "mariadb",
-      insertId: (result as unknown as { insertId?: number })?.insertId ?? null
+      insertId: (result as { insertId?: number })?.insertId ?? null
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro ao gravar no MariaDB";
+    const parsed = typeof parseDbError === "function" ? parseDbError(err) : err;
+    const message =
+      parsed instanceof Error
+        ? parsed.message
+        : typeof parsed === "string"
+          ? parsed
+          : err instanceof Error
+            ? err.message
+            : "Erro ao gravar no MariaDB";
     return NextResponse.json(
       {
         ok: false,
