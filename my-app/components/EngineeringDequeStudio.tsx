@@ -1123,7 +1123,7 @@ export default function EngineeringDequeStudio({
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {selectedNode.realWorldProblem} · Disco/Console: {selectedNode.diskSizeGb} GB · Nuvem: {selectedNode.cloudBitrateMbps} Mbps
+                  {""} · Disco/Console: {selectedNode.diskSizeGb} GB · Nuvem: {selectedNode.cloudBitrateMbps} Mbps
                 </p>
               </div>
               <div className="text-right">
@@ -1382,6 +1382,7 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
 
 
 
