@@ -1,0 +1,866 @@
+=== SYNSTROM // ESTADO ATUAL DO PROJETO ===
+Data: 2026-11-23 13:24:15
+Diretorio: C:\Users\dimyt\OneDrive\Documentos\meu-projeto-saas\my-app
+
+--- 1. PORTA 3000 E GIT ---
+Porta 3000: LISTENING (PID 21676)
+Branch: main | Ultimo commit: e5cc3b0 feat(implantacao): add R$ 30000 target scenarios and sync deployment portal | Alteracoes pendentes: 0
+
+--- 2. ROTAS E ARQUIVOS CHAVE ---
+app\api\artist-gazette\route.ts (4256 bytes)
+app\api\contest-awards\route.ts (3522 bytes)
+app\api\decision-checkout\route.ts (1457 bytes)
+app\api\deque-progress\route.ts (3671 bytes)
+app\api\feed-engenharias\route.ts (1686 bytes)
+app\api\health\route.ts (710 bytes)
+app\api\hpc-route\route.ts (1931 bytes)
+app\api\licenses\route.ts (4482 bytes)
+app\api\license-token\route.ts (2329 bytes)
+app\api\module-intel\route.ts (3268 bytes)
+app\api\progress-digest\adapt\route.ts (4514 bytes)
+app\api\progress-digest\dispatch\route.ts (6209 bytes)
+app\api\progress-digest\live-source\route.ts (5913 bytes)
+app\api\progress-digest\schedule\route.ts (4648 bytes)
+app\api\scale\capacity-guard\route.ts (2132 bytes)
+app\api\scale\checkout\route.ts (4374 bytes)
+app\api\scale\governance\route.ts (2408 bytes)
+app\api\scale\live-passes\route.ts (5208 bytes)
+app\api\scale\live-session\route.ts (4450 bytes)
+app\api\scale\organizations\route.ts (3626 bytes)
+app\api\scale\payments\mercadopago\checkout-pass\route.ts (4554 bytes)
+app\api\scale\payments\mercadopago\create\route.ts (3729 bytes)
+app\api\scale\provision\route.ts (1699 bytes)
+app\api\scale\subscriptions\route.ts (3052 bytes)
+app\api\scale\webhooks\activate\route.ts (3736 bytes)
+app\api\scale\webhooks\gateway\route.ts (5000 bytes)
+app\api\scale\webhooks\inbound\route.ts (3186 bytes)
+app\api\scale\webhooks\route.ts (5598 bytes)
+app\api\streams\on-publish\route.ts (6144 bytes)
+app\api\streams\on-publish-done\route.ts (4730 bytes)
+app\api\stream-token\route.ts (2968 bytes)
+app\api\usuarios\route.ts (2470 bytes)
+app\api\webhooks\payment\route.ts (3416 bytes)
+app\cadastro\page.tsx (5432 bytes)
+app\concurso-artistas\page.tsx (244 bytes)
+app\dashboard\page.tsx (663 bytes)
+app\dashboard\progress-digest\page.tsx (987 bytes)
+app\demonstracao\page.tsx (3548 bytes)
+app\deque-engenharias\page.tsx (6391 bytes)
+app\implantacao\page.tsx (7048 bytes)
+app\link1\page.tsx (152 bytes)
+app\link2\page.tsx (152 bytes)
+app\link3\page.tsx (60 bytes)
+app\lives\page.tsx (11639 bytes)
+app\page.tsx (13248 bytes)
+app\player\progress-digest\page.tsx (300 bytes)
+app\proxima-pagina\page.tsx (1825 bytes)
+app\receita\page.tsx (3217 bytes)
+app\watch\page.tsx (3712 bytes)
+src\app\api\stream-token\route.ts (2355 bytes)
+src\app\page.tsx (233 bytes)
+src\app\watch\page.tsx (2965 bytes)
+
+--- 3. CONTEUDO DOS ARQUIVOS CHAVE ---
+>>> package.json
+{
+    "name": "my-app",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --webpack",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "@next/swc-win32-x64-msvc": "^16.4.6",
+        "clsx": "^2.1.1",
+        "dashjs": "^5.3.0",
+        "hls.js": "^1.7.4",
+        "jose": "^6.2.18",
+        "js": "^0.1.0",
+        "lucide-react": "^1.78.0",
+        "mysql2": "^3.24.6",
+        "next": "16.4.6",
+        "nodemailer": "^10.6.1",
+        "obs": "^1.0.2",
+        "obs-websocket-js": "^5.0.8",
+        "pg": "^8.23.1",
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
+        "redis": "^6.3.1",
+        "socket.io": "^4.8.4",
+        "tailwind-merge": "^3.7.1",
+        "websock": "^0.3.19"
+    },
+    "devDependencies": {
+        "@tailwindcss/turbopack": "4.3.3",
+        "@types/node": "^20",
+        "@types/nodemailer": "^8.0.2",
+        "@types/pg": "^8.23.1",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.4.6",
+        "tailwindcss": "4.3.3",
+        "typescript": "5.9.3"
+    }
+}
+
+<<< FIM package.json
+
+>>> ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: "synstrom-web",
+      script: "npm.cmd",
+      args: "run start",
+      cwd: ".",
+      watch: false,
+      autorestart: true,
+      env: {
+        NODE_ENV: "production",
+        PORT: "3000"
+      }
+    }
+  ]
+};
+<<< FIM ecosystem.config.js
+
+>>> lib\synstrom-pricing.ts (AUSENTE)
+
+>>> lib\synstrom-target-30k.ts
+export interface RevenueMixScenario {
+  id: string;
+  label: string;
+  deploymentsCount: number;
+  deploymentUnitBrl: number;
+  passesCount: number;
+  passUnitBrl: number;
+  totalBrl: number;
+  formattedTotalBrl: string;
+}
+
+export function getRevenueTargetBrl(): 30000 {
+  return 30000;
+}
+
+export function formatCurrencyBrl(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+}
+
+export function calculateRevenueTotalBrl(
+  deploymentsCount: number,
+  deploymentUnitBrl: number = 10000,
+  passesCount: number = 0,
+  passUnitBrl: number = 0
+): number {
+  const safeDeployments = Math.max(0, Number(deploymentsCount) || 0);
+  const safeDepUnit = Math.max(0, Number(deploymentUnitBrl) || 0);
+  const safePasses = Math.max(0, Number(passesCount) || 0);
+  const safePassUnit = Math.max(0, Number(passUnitBrl) || 0);
+  return Number((safeDeployments * safeDepUnit + safePasses * safePassUnit).toFixed(2));
+}
+
+export function getTarget30kScenarios(passUnitBrl: number = 25): RevenueMixScenario[] {
+  const safePassPrice = Math.max(1, Number(passUnitBrl) || 25);
+
+  const s1Deployments = 3;
+  const s1Passes = 0;
+  const s1Total = calculateRevenueTotalBrl(s1Deployments, 10000, s1Passes, safePassPrice);
+
+  const s2Deployments = 2;
+  const s2Passes = Math.ceil(10000 / safePassPrice);
+  const s2Total = calculateRevenueTotalBrl(s2Deployments, 10000, s2Passes, safePassPrice);
+
+  const s3Deployments = 1;
+  const s3Passes = Math.ceil(20000 / safePassPrice);
+  const s3Total = calculateRevenueTotalBrl(s3Deployments, 10000, s3Passes, safePassPrice);
+
+  return [
+    {
+      id: "3x-impl-10k",
+      label: "3x R$ 10k",
+      deploymentsCount: s1Deployments,
+      deploymentUnitBrl: 10000,
+      passesCount: s1Passes,
+      passUnitBrl: safePassPrice,
+      totalBrl: s1Total,
+      formattedTotalBrl: formatCurrencyBrl(s1Total)
+    },
+    {
+      id: "2x-impl-plus-passes",
+      label: "2x R$ 10k + Passes",
+      deploymentsCount: s2Deployments,
+      deploymentUnitBrl: 10000,
+      passesCount: s2Passes,
+      passUnitBrl: safePassPrice,
+      totalBrl: s2Total,
+      formattedTotalBrl: formatCurrencyBrl(s2Total)
+    },
+    {
+      id: "1x-impl-plus-passes",
+      label: "1x R$ 10k + Passes",
+      deploymentsCount: s3Deployments,
+      deploymentUnitBrl: 10000,
+      passesCount: s3Passes,
+      passUnitBrl: safePassPrice,
+      totalBrl: s3Total,
+      formattedTotalBrl: formatCurrencyBrl(s3Total)
+    }
+  ];
+}
+<<< FIM lib\synstrom-target-30k.ts
+
+>>> app\page.tsx
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Activity,
+  ArrowUpRight,
+  Cpu,
+  HeartHandshake,
+  Layers,
+  Lock,
+  Palette,
+  Radio,
+  ShieldCheck,
+  TrendingUp
+} from "lucide-react";
+
+type SectionKey = "artists" | "lives" | "psychology" | "core";
+
+interface PortalNode {
+  id: string;
+  href: string;
+  code: string;
+  section: SectionKey;
+  accent: string;
+  progress: number;
+  gated?: boolean;
+  rgb: string;
+  glow: string;
+  speed: number;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const PORTAL_NODES: PortalNode[] = [
+  {
+    id: "digital-artists-contests",
+    href: "/concurso-artistas",
+    code: "ART",
+    section: "artists",
+    accent: "border-amber-400/40 bg-amber-500/10 text-amber-300 hover:border-amber-400",
+    progress: 82,
+    gated: true,
+    rgb: "251, 191, 36",
+    glow: "rgba(251, 191, 36, 0.20)",
+    speed: 1.05,
+    icon: Palette
+  },
+  {
+    id: "live-streams-hub",
+    href: "/lives",
+    code: "LIVE",
+    section: "lives",
+    accent: "border-rose-400/40 bg-rose-500/10 text-rose-300 hover:border-rose-400",
+    progress: 90,
+    rgb: "251, 113, 133",
+    glow: "rgba(251, 113, 133, 0.22)",
+    speed: 1.45,
+    icon: Radio
+  },
+  {
+    id: "ai-psychology-shield",
+    href: "/psicologia-ia",
+    code: "MIND",
+    section: "psychology",
+    accent: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400",
+    progress: 88,
+    rgb: "52, 211, 153",
+    glow: "rgba(52, 211, 153, 0.18)",
+    speed: 0.72,
+    icon: HeartHandshake
+  },
+  {
+    id: "deque-studio",
+    href: "/deque-engenharias",
+    code: "DEQUE",
+    section: "core",
+    accent: "border-teal-400/40 bg-teal-500/10 text-teal-300 hover:border-teal-400",
+    progress: 100,
+    rgb: "45, 212, 191",
+    glow: "rgba(45, 212, 191, 0.22)",
+    speed: 1.15,
+    icon: Layers
+  },
+  {
+    id: "hypermedia-deck",
+    href: "/synstrom-deck/index.html",
+    code: "DECK",
+    section: "core",
+    accent: "border-sky-400/40 bg-sky-500/10 text-sky-300 hover:border-sky-400",
+    progress: 85,
+    rgb: "56, 189, 248",
+    glow: "rgba(56, 189, 248, 0.20)",
+    speed: 1.1,
+    icon: Cpu
+  },
+  {
+    id: "revenue-stream",
+    href: "/receita",
+    code: "PASS",
+    section: "core",
+    accent: "border-cyan-400/40 bg-cyan-500/10 text-cyan-300 hover:border-cyan-400",
+    progress: 90,
+    rgb: "34, 211, 238",
+    glow: "rgba(34, 211, 238, 0.19)",
+    speed: 1.0,
+    icon: TrendingUp
+  },
+  {
+    id: "telemetry-core",
+    href: "/dashboard",
+    code: "CORE",
+    section: "core",
+    accent: "border-indigo-400/40 bg-indigo-500/10 text-indigo-300 hover:border-indigo-400",
+    progress: 95,
+    rgb: "129, 140, 248",
+    glow: "rgba(129, 140, 248, 0.20)",
+    speed: 1.25,
+    icon: Activity
+  }
+];
+
+interface FlowParticle {
+  x: number;
+  y: number;
+  px: number;
+  py: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  alpha: number;
+}
+
+function FlowFieldCanvas({
+  rgb,
+  speedMultiplier
+}: {
+  rgb: string;
+  speedMultiplier: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const themeRef = useRef({ rgb, speedMultiplier });
+  const pointerRef = useRef({ x: -9999, y: -9999, active: false });
+
+  useEffect(() => {
+    themeRef.current = { rgb, speedMultiplier };
+  }, [rgb, speedMultiplier]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let rafId = 0;
+    let tick = 0;
+    let isVisible = document.visibilityState === "visible";
+
+    const particleCount = width < 640 ? 48 : 96;
+    const particles: FlowParticle[] = [];
+
+    const spawnParticle = (initial = false): FlowParticle => {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const maxLife = 90 + Math.random() * 140;
+      return {
+        x,
+        y,
+        px: x,
+        py: y,
+        vx: 0,
+        vy: 0,
+        life: initial ? Math.random() * maxLife : 0,
+        maxLife,
+        alpha: 0.08 + Math.random() * 0.16
+      };
+    };
+
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    resize();
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(spawnParticle(true));
+    }
+
+    const onPointerMove = (e: PointerEvent) => {
+      pointerRef.current = { x: e.clientX, y: e.clientY, active: true };
+    };
+
+    const onPointerLeave = () => {
+      pointerRef.current.active = false;
+    };
+
+    const onVisibilityChange = () => {
+      isVisible = document.visibilityState === "visible";
+      if (isVisible && !reducedMotion && !rafId) {
+        rafId = window.requestAnimationFrame(render);
+      }
+    };
+
+    const renderFrame = (stepOnce: boolean) => {
+      tick += 0.0045 * themeRef.current.speedMultiplier;
+      ctx.clearRect(0, 0, width, height);
+
+      const { rgb: activeRgb, speedMultiplier } = themeRef.current;
+      const ptr = pointerRef.current;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.px = p.x;
+        p.py = p.y;
+
+        const nx = p.x * 0.0024;
+        const ny = p.y * 0.0024;
+        const angle =
+          Math.sin(nx * 2.1 + tick) * Math.cos(ny * 2.1 - tick * 0.8) * Math.PI * 1.45 +
+          Math.sin((nx + ny) * 1.3 + tick * 0.5) * 0.65;
+
+        let forceX = Math.cos(angle) * 0.85 * speedMultiplier;
+        let forceY = Math.sin(angle) * 0.85 * speedMultiplier;
+
+        if (ptr.active) {
+          const dx = ptr.x - p.x;
+          const dy = ptr.y - p.y;
+          const distSq = dx * dx + dy * dy;
+          const radius = 190;
+          if (distSq > 1 && distSq < radius * radius) {
+            const dist = Math.sqrt(distSq);
+            const pull = (1 - dist / radius) * 0.55;
+            const swirlX = -dy / dist;
+            const swirlY = dx / dist;
+            forceX += (dx / dist) * pull * 0.45 + swirlX * pull * 0.85;
+            forceY += (dy / dist) * pull * 0.45 + swirlY * pull * 0.85;
+          }
+        }
+
+        p.vx = p.vx * 0.86 + forceX * 0.14;
+        p.vy = p.vy * 0.86 + forceY * 0.14;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life += stepOnce ? 1 : 0.6;
+
+        const fade = Math.sin(Math.min(p.life / p.maxLife, 1) * Math.PI);
+        const strokeAlpha = Math.max(0, p.alpha * fade);
+
+        ctx.beginPath();
+        ctx.moveTo(p.px, p.py);
+        ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = `rgba(${activeRgb}, ${strokeAlpha.toFixed(3)})`;
+        ctx.lineWidth = 1.25;
+        ctx.stroke();
+
+        if (
+          p.life >= p.maxLife ||
+          p.x < -30 ||
+          p.x > width + 30 ||
+          p.y < -30 ||
+          p.y > height + 30
+        ) {
+          particles[i] = spawnParticle(false);
+        }
+      }
+    };
+
+    const render = () => {
+      rafId = 0;
+      if (!isVisible) return;
+      renderFrame(true);
+      rafId = window.requestAnimationFrame(render);
+    };
+
+    renderFrame(false);
+    if (!reducedMotion && isVisible) {
+      rafId = window.requestAnimationFrame(render);
+    }
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("pointerleave", onPointerLeave);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerleave", onPointerLeave);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-0"
+    />
+  );
+}
+
+export default function SaaSRootPortal() {
+  const [activeId, setActiveId] = useState<string>("digital-artists-contests");
+  const activeNode = PORTAL_NODES.find((n) => n.id === activeId) || PORTAL_NODES[0];
+
+  return (
+    <main
+      data-portal="synstrom-root"
+      data-brand="SynStrom"
+      data-bg-engine="flow-field-coupled"
+      data-active-route={activeNode.href}
+      data-active-code={activeNode.code}
+      data-active-section={activeNode.section}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#040811] px-4 py-10 text-slate-100"
+      style={{
+        backgroundImage: `radial-gradient(circle at 50% 18%, ${activeNode.glow} 0%, rgba(15, 36, 68, 0.42) 38%, rgba(4, 8, 17, 1) 76%)`
+      }}
+    >
+      <FlowFieldCanvas rgb={activeNode.rgb} speedMultiplier={activeNode.speed} />
+
+      <section
+        className="relative z-10 w-full max-w-4xl rounded-3xl border border-sky-400/20 bg-slate-950/70 p-6 shadow-2xl transition-colors duration-300"
+        style={{
+          backdropFilter: "blur(14px) saturate(130%)",
+          WebkitBackdropFilter: "blur(14px) saturate(130%)"
+        }}
+      >
+        <header className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <span
+              className="h-3 w-3 rounded-full transition-colors duration-300"
+              style={{
+                backgroundColor: `rgb(${activeNode.rgb})`,
+                boxShadow: `0 0 12px rgba(${activeNode.rgb}, 0.85)`
+              }}
+            />
+            <span className="font-mono text-xs font-semibold tracking-[0.28em] text-slate-200">
+              SYNSTROM
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-900">
+              <div
+                className="h-full bg-gradient-to-r from-teal-400 to-sky-400 transition-all duration-300"
+                style={{ width: `${activeNode.progress}%` }}
+              />
+            </div>
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+          </div>
+        </header>
+
+        <nav aria-label="root-navigation" className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+          {PORTAL_NODES.map((node) => {
+            const Icon = node.icon;
+            const isSelected = node.id === activeId;
+
+            return (
+              <a
+                key={node.id}
+                href={node.href}
+                aria-label={node.code}
+                data-route={node.href}
+                data-section={node.section}
+                data-gated={node.gated ? "1" : "0"}
+                onMouseEnter={() => setActiveId(node.id)}
+                onFocus={() => setActiveId(node.id)}
+                className={`group relative flex h-28 flex-col items-center justify-between rounded-2xl border p-3.5 transition-all duration-200 hover:-translate-y-1 ${node.accent} ${
+                  isSelected ? "ring-2 ring-teal-400/60" : ""
+                }`}
+              >
+                <div className="flex w-full items-center justify-between">
+                  <span className="font-mono text-[10px] tracking-widest opacity-85">
+                    {node.code}
+                  </span>
+                  {node.gated ? (
+                    <Lock className="h-3.5 w-3.5 text-amber-400/90" />
+                  ) : (
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" />
+                  )}
+                </div>
+
+                <Icon className="h-7 w-7 transition-transform duration-200 group-hover:scale-110" />
+
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-950/90">
+                  <div
+                    className="h-full bg-current opacity-80 transition-all duration-300"
+                    style={{ width: `${node.progress}%` }}
+                  />
+                </div>
+              </a>
+            );
+          })}
+        </nav>
+
+        <footer className="mt-6 flex items-center justify-between rounded-2xl border border-slate-800/80 bg-slate-900/60 px-4 py-3">
+          <span className="font-mono text-xs text-slate-400">{activeNode.href}</span>
+          <a
+            href={activeNode.href}
+            aria-label="enter-active"
+            data-target-route={activeNode.href}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-teal-400 px-4 font-mono text-xs font-semibold text-slate-950 transition-transform hover:scale-105"
+          >
+            <span>{activeNode.code}</span>
+            <ArrowUpRight className="h-4 w-4" />
+          </a>
+        </footer>
+      </section>
+    </main>
+  );
+}
+<<< FIM app\page.tsx
+
+>>> app\implantacao\page.tsx
+"use client";
+
+import React, { useState } from "react";
+import { ArrowLeft, ArrowUpRight, Briefcase, HeartHandshake, Radio, ShieldCheck } from "lucide-react";
+import {
+  formatCurrencyBrl,
+  getRevenueTargetBrl,
+  getTarget30kScenarios
+} from "@/lib/synstrom-target-30k";
+
+interface DeploymentTier {
+  id: string;
+  code: string;
+  pillar: "security" | "performance" | "interaction";
+  targetRoute: string;
+  amountBrl: number;
+  readiness: number;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const DEPLOYMENT_TIERS: DeploymentTier[] = [
+  {
+    id: "impl-security-tokens",
+    code: "IMPL-SEC",
+    pillar: "security",
+    targetRoute: "/deque-engenharias",
+    amountBrl: 10000,
+    readiness: 92,
+    icon: ShieldCheck
+  },
+  {
+    id: "impl-live-streams",
+    code: "IMPL-LIVE",
+    pillar: "performance",
+    targetRoute: "/lives",
+    amountBrl: 10000,
+    readiness: 88,
+    icon: Radio
+  },
+  {
+    id: "impl-community-shield",
+    code: "IMPL-MIND",
+    pillar: "interaction",
+    targetRoute: "/psicologia-ia",
+    amountBrl: 10000,
+    readiness: 85,
+    icon: HeartHandshake
+  }
+];
+
+export default function ImplementationPortal() {
+  const [selectedId, setSelectedId] = useState<string>("impl-security-tokens");
+  const [scenarioIdx, setScenarioIdx] = useState<number>(0);
+
+  const current = DEPLOYMENT_TIERS.find((t) => t.id === selectedId) || DEPLOYMENT_TIERS[0];
+  const scenarios = getTarget30kScenarios(25);
+  const activeScenario = scenarios[scenarioIdx] || scenarios[0];
+  const targetAmount = getRevenueTargetBrl();
+
+  return (
+    <main
+      data-portal="synstrom-implantacao"
+      data-brand="SynStrom"
+      data-deployment-code={current.code}
+      data-deployment-pillar={current.pillar}
+      data-deployment-amount-brl={String(current.amountBrl)}
+      data-revenue-target-brl={String(targetAmount)}
+      data-target-route={current.targetRoute}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#040811] px-4 py-10 text-slate-100"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 50% 15%, rgba(20, 184, 166, 0.18) 0%, rgba(15, 36, 68, 0.45) 42%, rgba(4, 8, 17, 1) 78%)"
+      }}
+    >
+      <section
+        className="relative z-10 w-full max-w-3xl rounded-3xl border border-teal-400/25 bg-slate-950/75 p-6 shadow-2xl"
+        style={{
+          backdropFilter: "blur(14px) saturate(130%)",
+          WebkitBackdropFilter: "blur(14px) saturate(130%)"
+        }}
+      >
+        <header className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <a
+              href="/"
+              aria-label="back-root"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-slate-300 transition-colors hover:border-teal-400/50 hover:text-teal-300"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </a>
+            <Briefcase className="h-4 w-4 text-teal-400" />
+            <span className="font-mono text-xs font-semibold tracking-[0.24em] text-slate-200">
+              SYNSTROM // IMPLANTACAO
+            </span>
+          </div>
+
+          <span className="font-mono text-xs font-semibold text-teal-300">
+            {formatCurrencyBrl(targetAmount)}
+          </span>
+        </header>
+
+        <nav aria-label="deployment-packages" className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {DEPLOYMENT_TIERS.map((tier) => {
+            const Icon = tier.icon;
+            const isSelected = tier.id === selectedId;
+
+            return (
+              <button
+                key={tier.id}
+                type="button"
+                aria-label={tier.code}
+                data-code={tier.code}
+                data-pillar={tier.pillar}
+                data-amount-brl={String(tier.amountBrl)}
+                data-route={tier.targetRoute}
+                onClick={() => setSelectedId(tier.id)}
+                onFocus={() => setSelectedId(tier.id)}
+                className={`group flex h-32 flex-col items-center justify-between rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-1 ${
+                  isSelected
+                    ? "border-teal-400 bg-teal-500/15 text-teal-200 ring-2 ring-teal-400/50"
+                    : "border-slate-800/90 bg-slate-900/60 text-slate-300 hover:border-teal-400/40"
+                }`}
+              >
+                <div className="flex w-full items-center justify-between">
+                  <span className="font-mono text-[10px] tracking-widest opacity-85">
+                    {tier.code}
+                  </span>
+                  <span className="font-mono text-[11px] font-semibold">
+                    {formatCurrencyBrl(tier.amountBrl)}
+                  </span>
+                </div>
+
+                <Icon className="h-7 w-7 transition-transform duration-200 group-hover:scale-110" />
+
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-950/90">
+                  <div
+                    className="h-full bg-teal-400/85 transition-all duration-300"
+                    style={{ width: `${tier.readiness}%` }}
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div aria-label="target-30k-scenarios" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {scenarios.map((sc, idx) => {
+            const active = idx === scenarioIdx;
+            return (
+              <button
+                key={sc.id}
+                type="button"
+                aria-label={sc.label}
+                onClick={() => setScenarioIdx(idx)}
+                className={`flex items-center justify-between rounded-xl border px-3 py-2 font-mono text-[11px] transition-colors ${
+                  active
+                    ? "border-teal-400 bg-teal-500/15 text-teal-200"
+                    : "border-slate-800/80 bg-slate-900/50 text-slate-400 hover:border-teal-400/40"
+                }`}
+              >
+                <span>{sc.label}</span>
+                <span>{sc.formattedTotalBrl}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <footer className="mt-6 flex items-center justify-between rounded-2xl border border-slate-800/80 bg-slate-900/65 px-4 py-3">
+          <span className="font-mono text-xs text-slate-400">
+            {current.code} · {activeScenario.label} · {activeScenario.formattedTotalBrl}
+          </span>
+          <a
+            href={current.targetRoute}
+            aria-label="open-deployment-module"
+            data-target-route={current.targetRoute}
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-teal-400 px-4 font-mono text-xs font-semibold text-slate-950 transition-transform hover:scale-105"
+          >
+            <span>{current.code}</span>
+            <ArrowUpRight className="h-4 w-4" />
+          </a>
+        </footer>
+      </section>
+    </main>
+  );
+}
+<<< FIM app\implantacao\page.tsx
+
+>>> app\psicologia-ia\page.tsx (AUSENTE)
+
+>>> app\layout.tsx
+import "./globals.css";
+import "../styles/cerro-overlays.css";
+import "../styles/cerro-vector-ux.css";
+import "../styles/cerro-gazette-theme.css";
+import type { Metadata } from "next";
+import { TelemetryProvider } from "./TelemetryContext";
+
+export const metadata: Metadata = {
+  title: "SynStrom",
+  description: "SynStrom — Fluxo, Licenciamento e Telemetria"
+};
+
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="pt-BR">
+      <body>
+        <TelemetryProvider>{children}</TelemetryProvider>
+      </body>
+    </html>
+  );
+}
+<<< FIM app\layout.tsx
+
