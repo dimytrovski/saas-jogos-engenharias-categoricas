@@ -1,15 +1,15 @@
 ﻿import "./globals.css";
-import `../styles/cerro-overlays.css`;
-import `../styles/cerro-vector-ux.css`;
-import `../styles/cerro-gazette-theme.css`;
+import "../styles/cerro-overlays.css";
+import "../styles/cerro-vector-ux.css";
+import "../styles/cerro-gazette-theme.css";
 import type { Metadata } from "next";
-import `../styles/cerro-overlays.css`;
-import `../styles/cerro-vector-ux.css`;
-import `../styles/cerro-gazette-theme.css`;
+import "../styles/cerro-overlays.css";
+import "../styles/cerro-vector-ux.css";
+import "../styles/cerro-gazette-theme.css";
 import { TelemetryProvider } from './TelemetryContext';
-import `../styles/cerro-overlays.css`;
-import `../styles/cerro-vector-ux.css`;
-import `../styles/cerro-gazette-theme.css`;
+import "../styles/cerro-overlays.css";
+import "../styles/cerro-vector-ux.css";
+import "../styles/cerro-gazette-theme.css";
 
 export const metadata: Metadata = {
   title: "Minha Aplicação",
@@ -29,5 +29,6 @@ export default function RootLayout({
     </html>
   );
 }
+
 
 

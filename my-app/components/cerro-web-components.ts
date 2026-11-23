@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import type React from "react";
+
 export function registerCerroWebComponents() {
   if (typeof window === "undefined" || !("customElements" in window)) return;
 
@@ -120,5 +122,35 @@ export function registerCerroWebComponents() {
     }
 
     customElements.define("cerro-vector-pulse", CerroVectorPulseElement);
+  }
+}
+
+type CerroCustomElementsMap = {
+  "cerro-overlay-badge": React.DetailedHTMLProps<
+    React.HTMLAttributes<HTMLElement> & {
+      code?: string;
+      discipline?: string;
+      charge?: string;
+      mode?: string;
+    },
+    HTMLElement
+  >;
+  "cerro-vector-pulse": React.DetailedHTMLProps<
+    React.HTMLAttributes<HTMLElement> & {
+      charge?: string;
+    },
+    HTMLElement
+  >;
+};
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements extends CerroCustomElementsMap {}
+  }
+}
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements extends CerroCustomElementsMap {}
   }
 }
