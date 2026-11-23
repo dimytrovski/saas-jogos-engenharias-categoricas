@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import CerroNavigationHub from "./CerroNavigationHub";
@@ -885,7 +885,7 @@ export default function EngineeringDequeStudio({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-teal-500/15 px-2.5 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300">
-                WEB DESIGN · PARTILHADO ENTRE ENGENHARIAS
+                
               </span>
               <span className="rounded-md bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                 DEQUE (Double-Ended Queue)
@@ -897,7 +897,7 @@ export default function EngineeringDequeStudio({
             </div>
             <div className="mb-1"><a href="/concurso-artistas" className="inline-block rounded border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-amber-700 hover:bg-amber-500/20 dark:text-amber-300">Acessar Cofre do Concurso &amp; Jornais (Participantes) &rarr;</a></div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Cerro-Gradle: Identidade Visual em Web Design, Cabo Trifasico na Tromba e Licenca de Producao
+              
             </h1>
             
           </div>
@@ -1072,9 +1072,7 @@ export default function EngineeringDequeStudio({
                 <h2 className="mt-3 text-center text-sm font-semibold leading-snug">
                   {node.title}
                 </h2>
-                <p className="mt-1 text-center text-xs text-zinc-500 dark:text-zinc-400">
-                  {node.discipline}
-                </p>
+                
 
                 <div className="mt-3 flex items-center justify-between text-xs">
                   <span className="font-semibold tabular-nums">{formatBrl(node.priceBrl)}</span>
@@ -1120,9 +1118,7 @@ export default function EngineeringDequeStudio({
                   BANCADA WEB DESIGN PARTILHADA · {selectedNode.code} · CARGA DO CORPO: {chargePct}%
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {""} · Disco/Console: {selectedNode.diskSizeGb} GB · Nuvem: {selectedNode.cloudBitrateMbps} Mbps
-                </p>
+                
               </div>
               <div className="text-right">
                 <div className="text-lg font-semibold tabular-nums">
@@ -1172,7 +1168,7 @@ export default function EngineeringDequeStudio({
 
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Comprar do Estoque do Servidor, Baixar e Garantir Licenca em Producao:
+                
               </div>
               <div className="mb-3 flex flex-wrap gap-2">
                 {(["disco_console", "streaming_nuvem", "hibrido"] as DeliveryMode[]).map(
@@ -1210,7 +1206,7 @@ export default function EngineeringDequeStudio({
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Dados Brutos de Engenharia:
+                  
                 </span>
                 <div className="flex gap-1">
                   <button
@@ -1239,7 +1235,7 @@ export default function EngineeringDequeStudio({
 
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Protocolos Auxiliares:
+                
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 {(
@@ -1294,7 +1290,7 @@ export default function EngineeringDequeStudio({
               PROGRESSO HUMANO DERIVADO &amp; PERSISTIDO EM BANCO DE DADOS
             </span>
             <h2 className="text-lg font-semibold">
-              Missoes, Desafios e Legados Conquistados no Aplicativo
+              
             </h2>
             
           </div>
@@ -1325,13 +1321,9 @@ export default function EngineeringDequeStudio({
                   {item.completed ? "CONQUISTADA" : "EM PROGRESSO"}
                 </span>
               </div>
-              <p className="mt-1.5 text-sm font-semibold">{item.mission}</p>
-              <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
-                <strong>Desafio:</strong> {item.challenge}
-              </p>
-              <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
-                <strong>Legado:</strong> {item.legacy}
-              </p>
+              
+              
+              
             </div>
           ))}
         </div>
