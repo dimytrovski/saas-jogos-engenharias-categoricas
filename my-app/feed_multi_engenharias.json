@@ -1,189 +1,137 @@
 ﻿{
-    "totalItens":  1,
-    "modoAcesso":  "Addon-Filtros-Rotas-Ativo",
-    "plataformaConsenso":  "Consenso-Agnostico-Web",
-    "usuarioId":  "player_ouro",
-    "itens":  [
-                  {
-                      "UsuarioId":  "player_ouro",
-                      "ModoAcesso":  "Addon-Filtros-Rotas-Ativo",
-                      "PlataformaConsenso":  "Consenso-Agnostico-Web",
-                      "Engenharia":  "Engenharia de Pesca",
-                      "ProblemaReal":  "Perda de qualidade e quebra da cadeia do frio no armazenamento e transporte",
-                      "OrigemColeta":  "Fallback-Seguro",
-                      "RotaBackend":  "/api/v2/rotas/avancado",
-                      "GeradoEm":  "2026-11-22 14:13:07"
-                  }
-              ]
+    "version":  "2026.11",
+    "platform":  "Cerro-Gradle",
+    "updatedAt":  "2026-11-22T22:42:58.6764340-03:00",
+    "disciplinesShared":  [
+                              "Engenharia Eletrica \u0026 Energia",
+                              "Engenharia de Software",
+                              "Engenharia Civil \u0026 Estrutural",
+                              "Engenharia Mecanica \u0026 Controle"
+                          ],
+    "modules":  [
+                    {
+                        "id":  "eng-eletrica-3f",
+                        "code":  "ENG-101",
+                        "title":  "Simulador Trifasico R/S/T \u0026 Carga de Rede",
+                        "discipline":  "Engenharia Eletrica \u0026 Energia",
+                        "realWorldProblem":  "Estabilidade de carga trifasica, fator de potencia e resposta transitoria com telemetria bruta.",
+                        "stockUnits":  80,
+                        "priceBrl":  149,
+                        "diskSizeGb":  18.5,
+                        "cloudBitrateMbps":  16,
+                        "sdlcProgress":  50,
+                        "sdlcStage":  "Build \u0026 Empacotamento",
+                        "protocols":  {
+                                          "hmacWebhook":  true,
+                                          "streamTokenGating":  true,
+                                          "chunkIntegritySha256":  true,
+                                          "sessionLeaseSync":  true
+                                      },
+                        "licenseActive":  false,
+                        "deliveryMode":  "hibrido",
+                        "lastServerSync":  "22:42:00",
+                        "rawSample":  {
+                                          "sampleRateHz":  4800,
+                                          "primaryMetricLabel":  "Frequencia Fundamental",
+                                          "primaryMetricValue":  "60.00 Hz",
+                                          "secondaryMetricLabel":  "Desequilibrio de Fase",
+                                          "secondaryMetricValue":  "0.8%",
+                                          "rawTelemetryFrame":  "RAW|ENG-101|VR=127.1V|VS=126.8V|VT=127.4V|FREQ=60.00Hz|CRC=A4F1",
+                                          "payloadJson":  "{`module`:`ENG-101`,`freqHz`:60.0,`phases`:[`R`,`S`,`T`],`valid`:true}"
+                                      }
+                    },
+                    {
+                        "id":  "eng-software-sdlc",
+                        "code":  "ENG-202",
+                        "title":  "Pipeline SDLC, Concorrencia \u0026 Telemetria",
+                        "discipline":  "Engenharia de Software",
+                        "realWorldProblem":  "Controle de filas, latencia de sincronizacao, integridade de pacotes e validacao de licencas.",
+                        "stockUnits":  95,
+                        "priceBrl":  129,
+                        "diskSizeGb":  12.2,
+                        "cloudBitrateMbps":  14.5,
+                        "sdlcProgress":  75,
+                        "sdlcStage":  "Verificacao de Protocolos",
+                        "protocols":  {
+                                          "hmacWebhook":  true,
+                                          "streamTokenGating":  true,
+                                          "chunkIntegritySha256":  true,
+                                          "sessionLeaseSync":  true
+                                      },
+                        "licenseActive":  false,
+                        "deliveryMode":  "streaming_nuvem",
+                        "lastServerSync":  "22:42:00",
+                        "rawSample":  {
+                                          "sampleRateHz":  2400,
+                                          "primaryMetricLabel":  "Latencia p99",
+                                          "primaryMetricValue":  "14.2 ms",
+                                          "secondaryMetricLabel":  "Taxa de Sucesso",
+                                          "secondaryMetricValue":  "99.94%",
+                                          "rawTelemetryFrame":  "RAW|ENG-202|P99=14.2ms|QUEUE=OK|SHA256=VERIFIED|CRC=7B09",
+                                          "payloadJson":  "{`module`:`ENG-202`,`p99Ms`:14.2,`integrity`:`SHA-256`}"
+                                      }
+                    },
+                    {
+                        "id":  "eng-civil-estrutural",
+                        "code":  "ENG-303",
+                        "title":  "Analise Estrutural, Tensoes \u0026 Fundacoes",
+                        "discipline":  "Engenharia Civil \u0026 Estrutural",
+                        "realWorldProblem":  "Distribuicao de esforcos axiais/fletores, limites de deformacao e margens de seguranca estrutural.",
+                        "stockUnits":  65,
+                        "priceBrl":  169,
+                        "diskSizeGb":  24.8,
+                        "cloudBitrateMbps":  18,
+                        "sdlcProgress":  50,
+                        "sdlcStage":  "Build \u0026 Empacotamento",
+                        "protocols":  {
+                                          "hmacWebhook":  true,
+                                          "streamTokenGating":  true,
+                                          "chunkIntegritySha256":  true,
+                                          "sessionLeaseSync":  true
+                                      },
+                        "licenseActive":  false,
+                        "deliveryMode":  "disco_console",
+                        "lastServerSync":  "22:42:00",
+                        "rawSample":  {
+                                          "sampleRateHz":  1200,
+                                          "primaryMetricLabel":  "Fator de Seguranca",
+                                          "primaryMetricValue":  "2.45x",
+                                          "secondaryMetricLabel":  "Flecha Maxima",
+                                          "secondaryMetricValue":  "1.8 mm",
+                                          "rawTelemetryFrame":  "RAW|ENG-303|FOS=2.45|DEFLECTION=1.8mm|LOAD=NOMINAL|CRC=3D82",
+                                          "payloadJson":  "{`module`:`ENG-303`,`fos`:2.45,`deflectionMm`:1.8}"
+                                      }
+                    },
+                    {
+                        "id":  "eng-mecanica-dinamica",
+                        "code":  "ENG-404",
+                        "title":  "Dinamica Rotativa, Torque \u0026 Controle PID",
+                        "discipline":  "Engenharia Mecanica \u0026 Controle",
+                        "realWorldProblem":  "Resposta em malha fechada, amortecimento vibracional e acoplamento de torque em regimes variaveis.",
+                        "stockUnits":  70,
+                        "priceBrl":  159,
+                        "diskSizeGb":  20,
+                        "cloudBitrateMbps":  15.5,
+                        "sdlcProgress":  75,
+                        "sdlcStage":  "Verificacao de Protocolos",
+                        "protocols":  {
+                                          "hmacWebhook":  true,
+                                          "streamTokenGating":  true,
+                                          "chunkIntegritySha256":  true,
+                                          "sessionLeaseSync":  true
+                                      },
+                        "licenseActive":  false,
+                        "deliveryMode":  "hibrido",
+                        "lastServerSync":  "22:42:00",
+                        "rawSample":  {
+                                          "sampleRateHz":  3600,
+                                          "primaryMetricLabel":  "Torque Nominal",
+                                          "primaryMetricValue":  "184.5 Nm",
+                                          "secondaryMetricLabel":  "Sobressinal PID",
+                                          "secondaryMetricValue":  "3.4%",
+                                          "rawTelemetryFrame":  "RAW|ENG-404|TORQUE=184.5Nm|OVERSHOOT=3.4%|RPM=1800|CRC=5C18",
+                                          "payloadJson":  "{`module`:`ENG-404`,`torqueNm`:184.5,`overshootPct`:3.4}"
+                                      }
+                    }
+                ]
 }
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Feed Multi-Engenharias — SaaS</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --border: #334155;
-      --badge-bg: #0f172a;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body {
-      margin: 0;
-      padding: 24px;
-      background: var(--bg);
-      color: var(--text);
-    }
-    header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
-    .meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-    .pill {
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 999px;
-      color: var(--text);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .eng {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .problema {
-      font-size: 1rem;
-      line-height: 1.45;
-      margin: 0;
-    }
-    .rodape {
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-      font-size: 0.8rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    button {
-      background: var(--accent);
-      color: #082f49;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    button:hover { opacity: 0.9; }
-    .aviso {
-      background: #3f1d1d;
-      border: 1px solid #991b1b;
-      color: #fecaca;
-      padding: 14px;
-      border-radius: 10px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div>
-      <h1 style="margin: 0 0 6px 0; font-size: 1.4rem;">Feed Roteado por Engenharia</h1>
-      <div id="status-meta" class="meta">Carregando dados...</div>
-    </div>
-    <button onclick="carregarFeed()">Atualizar Feed</button>
-  </header>
-
-  <main id="conteudo" class="grid"></main>
-
-  <script>
-    async function carregarFeed() {
-      const main = document.getElementById("conteudo");
-      const meta = document.getElementById("status-meta");
-
-      try {
-        // Cache-busting para pegar sempre a ultima execucao do PowerShell
-        const resp = await fetch(`./feed_multi_engenharias.json?t=${Date.now()}`);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-
-        meta.innerHTML = `
-          <span class="pill">Usuário: <strong>${escapeHtml(data.usuarioId || "-")}</strong></span>
-          <span class="pill">Modo: <strong>${escapeHtml(data.modoAcesso || "-")}</strong></span>
-          <span class="pill">Plataforma: <strong>${escapeHtml(data.plataformaConsenso || "-")}</strong></span>
-          <span class="pill">Itens: <strong>${data.totalItens ?? 0}</strong></span>
-        `;
-
-        const itens = Array.isArray(data.itens) ? data.itens : [];
-        if (itens.length === 0) {
-          main.innerHTML = `<div class="aviso">Nenhum item retornado para os filtros atuais.</div>`;
-          return;
-        }
-
-        main.innerHTML = itens.map(item => `
-          <article class="card">
-            <div class="eng">${escapeHtml(item.Engenharia)}</div>
-            <p class="problema">${escapeHtml(item.ProblemaReal)}</p>
-            <div class="rodape">
-              <span>Rota: ${escapeHtml(item.RotaBackend || "-")}</span>
-              <span>${escapeHtml(item.GeradoEm || "")}</span>
-            </div>
-          </article>
-        `).join("");
-      } catch (err) {
-        meta.textContent = "Falha ao ler feed_multi_engenharias.json";
-        main.innerHTML = `
-          <div class="aviso">
-            Não foi possível carregar o JSON diretamente via arquivo local (bloqueio de CORS em <code>file://</code>).
-            Rode um servidor local simples na pasta (ex.: <code>npx serve</code> ou <code>python -m http.server</code>) e abra em <code>http://localhost</code>.
-          </div>
-        `;
-      }
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    carregarFeed();
-  </script>
-</body>
-</html>
