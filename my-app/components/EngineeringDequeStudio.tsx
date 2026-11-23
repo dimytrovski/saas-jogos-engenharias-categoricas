@@ -82,7 +82,36 @@ function deliveryLabel(mode: DeliveryMode) {
   return "Hibrido (Disco + Nuvem)";
 }
 
-// Som caracteristico de elefante (barrito grave/formante com modulacao de frequencia)
+function getDisciplineAccent(discipline: string) {
+  const lower = discipline.toLowerCase();
+  if (lower.includes("software")) {
+    return {
+      tag: "SW · PIPELINE & SDLC",
+      ring: "#38bdf8",
+      badgeBg: "bg-sky-500/15 text-sky-700 dark:text-sky-300"
+    };
+  }
+  if (lower.includes("civil")) {
+    return {
+      tag: "CIVIL · ESTRUTURA & CARGA",
+      ring: "#f59e0b",
+      badgeBg: "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+    };
+  }
+  if (lower.includes("mecanica") || lower.includes("controle")) {
+    return {
+      tag: "MEC · DINAMICA & CONTROLE",
+      ring: "#a78bfa",
+      badgeBg: "bg-violet-500/15 text-violet-700 dark:text-violet-300"
+    };
+  }
+  return {
+    tag: "ELETRICA · 60 Hz / 3F",
+    ring: "#2dd4bf",
+    badgeBg: "bg-teal-500/15 text-teal-700 dark:text-teal-300"
+  };
+}
+
 function playElephantTrumpetSound() {
   if (typeof window === "undefined") return;
   const AudioCtx =
@@ -99,7 +128,6 @@ function playElephantTrumpetSound() {
     const filter = ctx.createBiquadFilter();
     const gain = ctx.createGain();
 
-    // Perfil de trombeta/barrito de elefante: subida rapida e vibrato nasal filtrado
     osc1.type = "sawtooth";
     osc1.frequency.setValueAtTime(135, now);
     osc1.frequency.exponentialRampToValueAtTime(340, now + 0.24);
@@ -136,7 +164,7 @@ function playElephantTrumpetSound() {
       ctx.close().catch(() => {});
     }, 1050);
   } catch {
-    // Ignora bloqueio antes de interacao
+    // Ignora bloqueio antes de gesto do usuario
   }
 }
 
@@ -148,27 +176,31 @@ interface TrunkHitBox {
   pad: number;
 }
 
-function drawThreePhaseElephantScene(
+// Emblema web designer inspirado no porte frontal do elefante (orelhas largas, presas e corpo coeso)
+// com tromba em cabo trifasico (R/S/T) que energiza o corpo ao contato do ponteiro
+function drawWebDesignElephantScene(
   ctx: CanvasRenderingContext2D,
   size: number,
   t: number,
   chargePct: number,
   isTouchingTrunk: boolean,
   showGuides: boolean,
+  accentHex: string,
   hitBoxRef: React.MutableRefObject<TrunkHitBox>
 ) {
   const cx = size / 2;
   const cy = size / 2;
-  const outerR = size * 0.43;
+  const outerR = size * 0.435;
   const innerR = outerR / PHI;
   const chargeFactor = Math.max(0, Math.min(1, chargePct / 100));
+  const phases = ["#ef4444", "#f59e0b", "#38bdf8"];
 
   ctx.clearRect(0, 0, size, size);
 
-  // Ambiente exclusivo de Engenharia Eletrica (subestacao, barramento e malha de potencia)
-  const bg = ctx.createRadialGradient(cx, cy * 0.85, outerR * 0.1, cx, cy, outerR * 1.15);
-  bg.addColorStop(0, chargeFactor > 0.2 ? "#0e2238" : "#0b1524");
-  bg.addColorStop(0.65, "#060c17");
+  // Fundo web design escuro de alta legibilidade com grade sutil
+  const bg = ctx.createRadialGradient(cx, cy * 0.8, outerR * 0.12, cx, cy, outerR * 1.18);
+  bg.addColorStop(0, chargeFactor > 0.2 ? "#10263b" : "#0c1726");
+  bg.addColorStop(0.68, "#060d18");
   bg.addColorStop(1, "#03060c");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, size, size);
@@ -177,15 +209,10 @@ function drawThreePhaseElephantScene(
   ctx.beginPath();
   ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
   ctx.strokeStyle =
-    chargeFactor >= 1
-      ? "#2dd4bf"
-      : isTouchingTrunk
-        ? "#f59e0b"
-        : "rgba(56, 189, 248, 0.55)";
+    chargeFactor >= 1 ? "#2dd4bf" : isTouchingTrunk ? "#f59e0b" : accentHex;
   ctx.lineWidth = Math.max(2, size * 0.008);
   ctx.stroke();
 
-  // Anel de proporcao aurea
   ctx.beginPath();
   ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
   ctx.strokeStyle = "rgba(245, 158, 11, 0.22)";
@@ -205,206 +232,198 @@ function drawThreePhaseElephantScene(
     ctx.stroke();
   }
 
-  // Recorte circular fechado do emblema
   ctx.beginPath();
   ctx.arc(cx, cy, outerR - 2, 0, Math.PI * 2);
   ctx.clip();
 
-  // Barramento trifasico de fundo (R, S, T)
-  const busYTop = cy - outerR * 0.62;
-  const busSpacing = outerR * 0.09;
-  const busColors = ["#ef4444", "#f59e0b", "#38bdf8"]; // Fases R, S, T
-  busColors.forEach((col, idx) => {
-    const by = busYTop + idx * busSpacing;
-    ctx.strokeStyle = col;
-    ctx.globalAlpha = 0.25 + chargeFactor * 0.55;
-    ctx.lineWidth = Math.max(1, size * 0.004);
+  // Grade de UI/grid de engenharia no fundo
+  const gridStep = Math.max(14, size * 0.075);
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.06)";
+  ctx.lineWidth = 1;
+  for (let gx = cx - outerR; gx <= cx + outerR; gx += gridStep) {
     ctx.beginPath();
-    ctx.moveTo(cx - outerR * 0.72, by);
-    ctx.lineTo(cx + outerR * 0.72, by);
+    ctx.moveTo(gx, cy - outerR);
+    ctx.lineTo(gx, cy + outerR);
     ctx.stroke();
-  });
-  ctx.globalAlpha = 1;
-
-  // Escala proporcional do elefante dentro do icone fechado
-  const u = outerR * 0.46;
-  const bodyCx = cx - u * 0.28;
-  const bodyCy = cy + u * 0.12;
-  const bodyRx = u * 0.78;
-  const bodyRy = u * 0.54;
-
-  // 4 patas solidas e bem definidas (sem empilhamento de elipses)
-  const legDefs = [
-    { x: bodyCx - bodyRx * 0.62, yTop: bodyCy + bodyRy * 0.45, h: u * 0.58, w: u * 0.24 },
-    { x: bodyCx - bodyRx * 0.25, yTop: bodyCy + bodyRy * 0.52, h: u * 0.54, w: u * 0.22 },
-    { x: bodyCx + bodyRx * 0.26, yTop: bodyCy + bodyRy * 0.52, h: u * 0.54, w: u * 0.22 },
-    { x: bodyCx + bodyRx * 0.6, yTop: bodyCy + bodyRy * 0.45, h: u * 0.58, w: u * 0.24 }
-  ];
-
-  legDefs.forEach((leg) => {
-    const gradLeg = ctx.createLinearGradient(leg.x, leg.yTop, leg.x, leg.yTop + leg.h);
-    gradLeg.addColorStop(0, chargeFactor > 0.1 ? "#1e3a5f" : "#1e293b");
-    gradLeg.addColorStop(1, "#0f172a");
-    ctx.fillStyle = gradLeg;
-    ctx.strokeStyle = chargeFactor > 0.35 ? "#2dd4bf" : "#64748b";
-    ctx.lineWidth = Math.max(1.2, size * 0.005);
+  }
+  for (let gy = cy - outerR; gy <= cy + outerR; gy += gridStep) {
     ctx.beginPath();
-    ctx.roundRect(leg.x - leg.w / 2, leg.yTop, leg.w, leg.h, leg.w * 0.28);
-    ctx.fill();
+    ctx.moveTo(cx - outerR, gy);
+    ctx.lineTo(cx + outerR, gy);
     ctx.stroke();
-  });
+  }
 
-  // Corpo unico, coeso e carregado eletricamente pelo contato na tromba trifasica
-  const bodyGrad = ctx.createLinearGradient(
-    bodyCx - bodyRx,
-    bodyCy - bodyRy,
-    bodyCx + bodyRx,
-    bodyCy + bodyRy
-  );
-  bodyGrad.addColorStop(0, "#16263d");
-  bodyGrad.addColorStop(0.5, chargeFactor > 0.15 ? "#134e4a" : "#1e293b");
-  bodyGrad.addColorStop(1, "#0f172a");
+  // Proporcoes frontais inspiradas na foto do elefante (corpo coeso + orelhas amplas + presas)
+  const u = outerR * 0.45;
+  const headY = cy - u * 0.24;
+  const bodyTopY = headY + u * 0.34;
+  const bodyBottomY = cy + u * 0.56;
+
+  // Corpo unico e coeso (carregado eletricamente pelo cabo trifasico da tromba)
+  const bodyGrad = ctx.createLinearGradient(cx - u * 0.72, bodyTopY, cx + u * 0.72, bodyBottomY);
+  bodyGrad.addColorStop(0, "#172940");
+  bodyGrad.addColorStop(0.55, chargeFactor > 0.1 ? "#114645" : "#1a2b42");
+  bodyGrad.addColorStop(1, "#0d1624");
 
   ctx.fillStyle = bodyGrad;
   ctx.strokeStyle = chargeFactor > 0.2 ? "#2dd4bf" : "#94a3b8";
   ctx.lineWidth = Math.max(1.8, size * 0.007);
   ctx.beginPath();
-  ctx.moveTo(bodyCx - bodyRx, bodyCy);
+  ctx.moveTo(cx - u * 0.52, bodyBottomY);
   ctx.bezierCurveTo(
-    bodyCx - bodyRx * 0.95,
-    bodyCy - bodyRy * 1.15,
-    bodyCx + bodyRx * 0.85,
-    bodyCy - bodyRy * 1.1,
-    bodyCx + bodyRx,
-    bodyCy - bodyRy * 0.1
+    cx - u * 0.76,
+    bodyBottomY - u * 0.22,
+    cx - u * 0.68,
+    bodyTopY + u * 0.04,
+    cx - u * 0.36,
+    bodyTopY
   );
+  ctx.lineTo(cx + u * 0.36, bodyTopY);
   ctx.bezierCurveTo(
-    bodyCx + bodyRx * 0.95,
-    bodyCy + bodyRy * 0.85,
-    bodyCx - bodyRx * 0.85,
-    bodyCy + bodyRy * 0.85,
-    bodyCx - bodyRx,
-    bodyCy
+    cx + u * 0.68,
+    bodyTopY + u * 0.04,
+    cx + u * 0.76,
+    bodyBottomY - u * 0.22,
+    cx + u * 0.52,
+    bodyBottomY
   );
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // Ondas de energia trifasica percorrendo o corpo conforme ele e carregado
+  // Pulsos de energia trifasica dentro do corpo conforme a carga sobe
   if (chargeFactor > 0.02) {
     ctx.save();
     ctx.clip();
-    const pulseCount = 3;
-    for (let p = 0; p < pulseCount; p++) {
-      const waveOffset = ((t * (1.5 + chargeFactor * 3.5) + p / pulseCount) % 1) * bodyRx * 2;
-      const wx = bodyCx - bodyRx + waveOffset;
-      ctx.strokeStyle = busColors[p % 3];
-      ctx.globalAlpha = 0.25 + chargeFactor * 0.55;
-      ctx.lineWidth = Math.max(1.5, size * 0.007);
+    for (let p = 0; p < 3; p++) {
+      const sweep = ((t * (1.4 + chargeFactor * 3.2) + p / 3) % 1) * (u * 1.4) - u * 0.7;
+      ctx.strokeStyle = phases[p];
+      ctx.globalAlpha = 0.22 + chargeFactor * 0.55;
+      ctx.lineWidth = Math.max(1.5, size * 0.0065);
       ctx.beginPath();
-      ctx.moveTo(wx, bodyCy - bodyRy);
-      ctx.quadraticCurveTo(wx + u * 0.14, bodyCy, wx - u * 0.06, bodyCy + bodyRy);
+      ctx.moveTo(cx + sweep, bodyTopY);
+      ctx.quadraticCurveTo(cx + sweep + u * 0.12, (bodyTopY + bodyBottomY) / 2, cx + sweep - u * 0.05, bodyBottomY);
       ctx.stroke();
     }
     ctx.restore();
   }
 
-  // Cabeca bem definida (cranio, orelha estrutural e presa/bornes)
-  const headX = bodyCx + bodyRx * 0.92;
-  const headY = bodyCy - bodyRy * 0.34;
-  const headR = u * 0.42;
+  // Orelhas amplas laterais (inspiradas na silhueta frontal da foto)
+  const earW = u * 0.68;
+  const earH = u * 0.76;
 
-  // Orelha grande e definida
-  ctx.fillStyle = "#162840";
-  ctx.strokeStyle = chargeFactor > 0.3 ? "#38bdf8" : "#94a3b8";
-  ctx.lineWidth = Math.max(1.5, size * 0.006);
+  // Orelha esquerda
+  ctx.fillStyle = "#142438";
+  ctx.strokeStyle = chargeFactor > 0.25 ? accentHex : "#94a3b8";
+  ctx.lineWidth = Math.max(1.6, size * 0.0065);
   ctx.beginPath();
-  ctx.ellipse(
-    headX - headR * 0.28,
-    headY + headR * 0.05,
-    headR * 0.44,
-    headR * 0.66,
-    -0.2,
-    0,
-    Math.PI * 2
+  ctx.moveTo(cx - u * 0.24, headY - earH * 0.36);
+  ctx.bezierCurveTo(
+    cx - u * 0.24 - earW,
+    headY - earH * 0.52,
+    cx - u * 0.24 - earW * 1.05,
+    headY + earH * 0.34,
+    cx - u * 0.22,
+    headY + earH * 0.42
   );
+  ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // Cabeca nitida com contorno fechado
-  ctx.fillStyle = "#1e334d";
-  ctx.strokeStyle = chargeFactor > 0.2 ? "#2dd4bf" : "#cbd5e1";
+  // Orelha direita
+  ctx.beginPath();
+  ctx.moveTo(cx + u * 0.24, headY - earH * 0.36);
+  ctx.bezierCurveTo(
+    cx + u * 0.24 + earW,
+    headY - earH * 0.52,
+    cx + u * 0.24 + earW * 1.05,
+    headY + earH * 0.34,
+    cx + u * 0.22,
+    headY + earH * 0.42
+  );
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Cabeca central definida
+  ctx.fillStyle = "#1e344e";
+  ctx.strokeStyle = chargeFactor > 0.2 ? "#2dd4bf" : "#e2e8f0";
   ctx.lineWidth = Math.max(1.8, size * 0.007);
   ctx.beginPath();
-  ctx.arc(headX, headY, headR * 0.78, 0, Math.PI * 2);
+  ctx.ellipse(cx, headY, u * 0.34, u * 0.38, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
 
-  // Olho / indicador optico nitido
-  ctx.fillStyle = chargeFactor >= 0.7 ? "#2dd4bf" : "#e2e8f0";
+  // Presas laterais estilizadas (inspiradas na foto)
+  ctx.strokeStyle = "#f8fafc";
+  ctx.lineWidth = Math.max(2.2, size * 0.009);
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(headX + headR * 0.28, headY - headR * 0.14, Math.max(2, size * 0.008), 0, Math.PI * 2);
+  ctx.moveTo(cx - u * 0.22, headY + u * 0.16);
+  ctx.quadraticCurveTo(cx - u * 0.38, headY + u * 0.44, cx - u * 0.24, headY + u * 0.62);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx + u * 0.22, headY + u * 0.16);
+  ctx.quadraticCurveTo(cx + u * 0.38, headY + u * 0.44, cx + u * 0.24, headY + u * 0.62);
+  ctx.stroke();
+
+  // Olhos definidos
+  ctx.fillStyle = chargeFactor >= 0.7 ? "#2dd4bf" : "#f8fafc";
+  ctx.beginPath();
+  ctx.arc(cx - u * 0.13, headY - u * 0.05, Math.max(2, size * 0.008), 0, Math.PI * 2);
+  ctx.arc(cx + u * 0.13, headY - u * 0.05, Math.max(2, size * 0.008), 0, Math.PI * 2);
   ctx.fill();
 
-  // TROMBA COMO CABO TRIFASICO (3 condutores R, S, T em bainha de isolacao)
-  const startX = headX + headR * 0.56;
-  const startY = headY + headR * 0.22;
-  const ctrl1X = startX + u * 0.55;
-  const ctrl1Y = startY + u * 0.05;
-  const ctrl2X = startX + u * 0.68;
-  const ctrl2Y = startY + u * 0.68;
-  const endX = startX + u * 0.22;
-  const endY = startY + u * 0.88;
+  // TROMBA COMO CABO TRIFASICO (3 condutores R, S, T que carregam o corpo ao contato)
+  const trunkStartX = cx;
+  const trunkStartY = headY + u * 0.14;
+  const trunkMidX = cx + u * 0.04;
+  const trunkMidY = headY + u * 0.56;
+  const trunkEndX = cx - u * 0.06;
+  const trunkEndY = headY + u * 0.92;
 
   hitBoxRef.current = {
-    x1: Math.min(startX, ctrl2X, endX),
-    y1: startY - u * 0.12,
-    x2: Math.max(startX, ctrl1X, ctrl2X) + u * 0.1,
-    y2: endY + u * 0.14,
-    pad: Math.max(12, size * 0.045)
+    x1: cx - u * 0.22,
+    y1: trunkStartY - u * 0.06,
+    x2: cx + u * 0.22,
+    y2: trunkEndY + u * 0.12,
+    pad: Math.max(12, size * 0.05)
   };
 
   // Bainha externa do cabo trifasico
-  ctx.strokeStyle = isTouchingTrunk || chargeFactor > 0.1 ? "#f59e0b" : "#475569";
-  ctx.lineWidth = Math.max(7, size * 0.032);
+  ctx.strokeStyle = isTouchingTrunk || chargeFactor > 0.1 ? "#f59e0b" : "#64748b";
+  ctx.lineWidth = Math.max(7, size * 0.03);
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.bezierCurveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, endX, endY);
+  ctx.moveTo(trunkStartX, trunkStartY);
+  ctx.quadraticCurveTo(trunkMidX, trunkMidY, trunkEndX, trunkEndY);
   ctx.stroke();
 
-  // Tres condutores internos trifasicos (Fases R, S, T) com pulsos de corrente
-  const conductorOffsets = [-2.4, 0, 2.4];
-  conductorOffsets.forEach((off, idx) => {
-    ctx.strokeStyle = busColors[idx];
-    ctx.lineWidth = Math.max(1.5, size * 0.0065);
+  // 3 condutores internos R, S, T
+  const offsets = [-2.4, 0, 2.4];
+  offsets.forEach((off, idx) => {
+    ctx.strokeStyle = phases[idx];
+    ctx.lineWidth = Math.max(1.5, size * 0.006);
     ctx.beginPath();
-    ctx.moveTo(startX + off, startY + off * 0.4);
-    ctx.bezierCurveTo(
-      ctrl1X + off,
-      ctrl1Y + off * 0.4,
-      ctrl2X + off,
-      ctrl2Y + off * 0.4,
-      endX + off,
-      endY + off * 0.4
-    );
+    ctx.moveTo(trunkStartX + off, trunkStartY);
+    ctx.quadraticCurveTo(trunkMidX + off, trunkMidY, trunkEndX + off, trunkEndY);
     ctx.stroke();
   });
 
-  // Indicador de carga no topo da barra de tensao
   ctx.fillStyle = "#e2e8f0";
-  ctx.font = `600 ${Math.max(10, Math.round(size * 0.038))}px monospace`;
+  ctx.font = `600 px monospace`;
   ctx.textAlign = "center";
   ctx.fillText(
-    `3F CARGA: ${chargePct}% ${isTouchingTrunk ? "[CONTATO ATIVO]" : ""}`,
+    `3F CARGA: %`,
     cx,
-    cy + outerR * 0.82
+    cy + outerR * 0.85
   );
 
   ctx.restore();
 }
 
-function ThreePhaseElephantCanvas({
+function WebDesignElephantCanvas({
   node,
   chargePct,
   onTrunkChargeTick,
@@ -428,6 +447,7 @@ function ThreePhaseElephantCanvas({
     pad: 16
   });
   const [isTouchingTrunk, setIsTouchingTrunk] = useState(false);
+  const accent = getDisciplineAccent(node.discipline);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -438,32 +458,33 @@ function ThreePhaseElephantCanvas({
     let rafId = 0;
     const start = performance.now();
 
-    const renderLoop = (now: number) => {
+    const loop = (now: number) => {
       const elapsed = (now - start) / 1000;
-      drawThreePhaseElephantScene(
+      drawWebDesignElephantScene(
         ctx,
         canvas.width,
         elapsed,
         chargePct,
         isTouchingTrunk,
         showGuides,
+        accent.ring,
         hitBoxRef
       );
-      rafId = requestAnimationFrame(renderLoop);
+      rafId = requestAnimationFrame(loop);
     };
 
-    rafId = requestAnimationFrame(renderLoop);
+    rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [node, chargePct, isTouchingTrunk, showGuides, sizePx]);
+  }, [node, chargePct, isTouchingTrunk, showGuides, sizePx, accent.ring]);
 
-  const checkPointerOnTrunk = (clientX: number, clientY: number) => {
+  const checkOnTrunk = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return false;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / Math.max(1, rect.width);
-    const scaleY = canvas.height / Math.max(1, rect.height);
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
+    const sx = canvas.width / Math.max(1, rect.width);
+    const sy = canvas.height / Math.max(1, rect.height);
+    const x = (clientX - rect.left) * sx;
+    const y = (clientY - rect.top) * sy;
     const hb = hitBoxRef.current;
     return (
       x >= hb.x1 - hb.pad &&
@@ -474,17 +495,17 @@ function ThreePhaseElephantCanvas({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const overTrunk = checkPointerOnTrunk(e.clientX, e.clientY);
-    setIsTouchingTrunk(overTrunk);
-    if (overTrunk) {
+    const over = checkOnTrunk(e.clientX, e.clientY);
+    setIsTouchingTrunk(over);
+    if (over) {
       onTrunkChargeTick(3.5);
     }
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const overTrunk = checkPointerOnTrunk(e.clientX, e.clientY);
-    setIsTouchingTrunk(overTrunk);
-    if (overTrunk) {
+    const over = checkOnTrunk(e.clientX, e.clientY);
+    setIsTouchingTrunk(over);
+    if (over) {
       onTrunkChargeTick(12);
     }
   };
@@ -501,7 +522,7 @@ function ThreePhaseElephantCanvas({
       ref={canvasRef}
       width={sizePx}
       height={sizePx}
-      style={{ width: `${sizePx}px`, height: `${sizePx}px` }}
+      style={{ width: `px`, height: `px` }}
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}
@@ -530,7 +551,7 @@ export default function EngineeringDequeStudio({
   const [dbRecords, setDbRecords] = useState<DbProgressRecord[]>([]);
   const [dbStatusLabel, setDbStatusLabel] = useState("Sincronizando MariaDB...");
   const [eventLog, setEventLog] = useState<string[]>([
-    `[SSR ${serverRenderedAt}] Ambiente de Engenharia Eletrica ativo. Passe o mouse na tromba trifasica para carregar o corpo.`
+    `[SSR ] Web design partilhado entre engenharias ativo. Toque na tromba trifasica para carregar o corpo.`
   ]);
 
   const trumpetedAtFullChargeRef = useRef(false);
@@ -540,7 +561,6 @@ export default function EngineeringDequeStudio({
     [deque, selectedId]
   );
 
-  // Missoes, desafios e legados derivados naturalmente do contato humano com o app
   const missionsAndLegacies = useMemo(() => {
     const hasCharged = chargePct >= 70;
     const isFullCharge = chargePct >= 100;
@@ -551,8 +571,8 @@ export default function EngineeringDequeStudio({
       {
         id: "m1",
         mission: "Energizar o Cabo Trifasico (R/S/T) via contato na tromba",
-        challenge: "Elevar a carga do corpo do elefante ate 100% sem perda de fase",
-        legacy: "Especialista em Energizacao Trifasica",
+        challenge: "Elevar a carga do corpo do elefante ate 100% nas engenharias",
+        legacy: "Especialista em Energizacao & Identidade Visual",
         completed: isFullCharge || hasCharged
       },
       {
@@ -616,6 +636,7 @@ export default function EngineeringDequeStudio({
           rawPayload: {
             code: node.code,
             title: node.title,
+            discipline: node.discipline,
             chargePct: nextCharge,
             licenseActive: node.licenseActive,
             sdlcProgress: node.sdlcProgress
@@ -628,13 +649,13 @@ export default function EngineeringDequeStudio({
         await loadDbRecords();
       }
     } catch {
-      // Silencioso em caso de falha de rede local
+      // Silencioso em falha de rede local
     }
   };
 
   const pushLog = (msg: string, playElephant = false) => {
     const now = new Date().toLocaleTimeString("pt-BR");
-    setEventLog((prev) => [`[${now}] ${msg}`, ...prev.slice(0, 12)]);
+    setEventLog((prev) => [`[] `, ...prev.slice(0, 12)]);
     if (soundEnabled && playElephant) {
       playElephantTrumpetSound();
     }
@@ -646,7 +667,7 @@ export default function EngineeringDequeStudio({
       if (next >= 100 && !trumpetedAtFullChargeRef.current) {
         trumpetedAtFullChargeRef.current = true;
         pushLog(
-          "CARGA TRIFASICA 100%: Corpo do elefante energizado pelo contato na tromba! Som emitido.",
+          "CARGA TRIFASICA 100%: Corpo energizado pelo contato na tromba! Som emitido.",
           true
         );
         if (selectedNode) {
@@ -697,10 +718,10 @@ export default function EngineeringDequeStudio({
   }, [autoCirculate, deque.length]);
 
   const insertNode = (end: "front" | "rear") => {
-    const title = customTitle.trim() || `Subestacao Trifasica ${customDiscipline}`;
+    const title = customTitle.trim() || `Modulo `;
     const price = Math.max(29.0, Number(customPrice) || 189.0);
-    const id = `eng-${Date.now().toString(36)}`;
-    const code = `ENG-${Math.floor(100 + Math.random() * 899)}`;
+    const id = `eng-`;
+    const code = `ENG-`;
 
     const newNode: EngineeringGameNode = {
       id,
@@ -708,7 +729,7 @@ export default function EngineeringDequeStudio({
       title,
       discipline: customDiscipline,
       realWorldProblem:
-        "Operacao trifasica R/S/T, chaveamento de barramento, entrega em disco/nuvem e licenca de producao.",
+        "Configuracao web design partilhada entre engenharias, carga trifasica na tromba, entrega em disco/nuvem e licenca de producao.",
       stockUnits: 60,
       priceBrl: price,
       diskSizeGb: 22.4,
@@ -727,10 +748,10 @@ export default function EngineeringDequeStudio({
       rawSample: {
         sampleRateHz: 4800,
         primaryMetricLabel: "Carga Trifasica",
-        primaryMetricValue: `${chargePct}%`,
-        secondaryMetricLabel: "Defasagem",
-        secondaryMetricValue: "120.0 deg",
-        rawTelemetryFrame: `RAW|${code}|BUS=3F_RST|CHARGE=${chargePct}%|FREQ=60.00Hz|CRC=9E2C`,
+        primaryMetricValue: `%`,
+        secondaryMetricLabel: "Disciplina",
+        secondaryMetricValue: customDiscipline,
+        rawTelemetryFrame: `RAW|409|DISC=|CHARGE=%|FREQ=60.00Hz|CRC=9E2C`,
         payloadJson: JSON.stringify(
           {
             module: title,
@@ -749,8 +770,8 @@ export default function EngineeringDequeStudio({
     setDeque((prev) => (end === "front" ? [newNode, ...prev] : [...prev, newNode]));
     setSelectedId(id);
     setCustomTitle("");
-    pushLog(`DEQUE ${end.toUpperCase()}: Inserido "${title}" (${code}).`);
-    persistProgressToDb(newNode, `deque_insert_${end}`, chargePct, activeDelivery);
+    pushLog(`DEQUE : Inserido "" (409) [].`);
+    persistProgressToDb(newNode, `deque_insert_`, chargePct, activeDelivery);
   };
 
   const removeEnd = (end: "front" | "rear") => {
@@ -761,7 +782,7 @@ export default function EngineeringDequeStudio({
     if (selectedId === target.id) {
       setSelectedId(remaining[0]?.id ?? "");
     }
-    pushLog(`DEQUE ${end.toUpperCase()}: Removido "${target.title}".`);
+    pushLog(`DEQUE : Removido "".`);
   };
 
   const purchaseAndDownload = (nodeId: string, mode: DeliveryMode) => {
@@ -770,7 +791,7 @@ export default function EngineeringDequeStudio({
       prev.map((item) => {
         if (item.id !== nodeId) return item;
         if (item.stockUnits <= 0) {
-          pushLog(`ESTOQUE ESGOTADO para ${item.code}.`);
+          pushLog(`ESTOQUE ESGOTADO para .`);
           return item;
         }
         const nextStock = item.stockUnits - 1;
@@ -796,7 +817,7 @@ export default function EngineeringDequeStudio({
         };
 
         pushLog(
-          `COMPRA & DOWNLOAD [${deliveryLabel(mode)}]: "${item.title}" baixado. Estoque: ${nextStock}. Licenca producao ativa.`,
+          `COMPRA & DOWNLOAD []: "" baixado. Estoque: . Licenca producao ativa.`,
           true
         );
 
@@ -824,7 +845,7 @@ export default function EngineeringDequeStudio({
           licenseActive: active,
           lastServerSync: new Date().toLocaleTimeString("pt-BR")
         };
-        pushLog(`SDLC [${item.code}]: ${nextStage.pct}% (${nextStage.label}).`);
+        pushLog(`SDLC []: % ().`);
         return updatedNode;
       })
     );
@@ -841,7 +862,7 @@ export default function EngineeringDequeStudio({
       prev.map((item) => {
         if (item.id !== nodeId) return item;
         const updatedVal = !item.protocols[key];
-        pushLog(`PROTOCOLO [${item.code}] ${key}: ${updatedVal ? "OK" : "CHECK"}.`);
+        pushLog(`PROTOCOLO [] : .`);
         return {
           ...item,
           protocols: {
@@ -855,13 +876,13 @@ export default function EngineeringDequeStudio({
 
   return (
     <div className="space-y-6">
-      {/* Cabecalho de Engenharia Eletrica e controle do Deque */}
+      {/* Cabecalho de Web Design Partilhado entre Engenharias */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-teal-500/15 px-2.5 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300">
-                ENGENHARIA ELETRICA · 60 Hz / 3F
+                WEB DESIGN · PARTILHADO ENTRE ENGENHARIAS
               </span>
               <span className="rounded-md bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                 DEQUE (Double-Ended Queue)
@@ -872,10 +893,10 @@ export default function EngineeringDequeStudio({
               <span className="text-xs text-zinc-500">SSR: {serverRenderedAt}</span>
             </div>
             <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Cerro-Gradle: Cabo Trifasico na Tromba, Carga do Corpo e Licenca de Producao
+              Cerro-Gradle: Identidade Visual em Web Design, Cabo Trifasico na Tromba e Licenca de Producao
             </h1>
             <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Passe ou clique na tromba (cabo trifasico) para carregar o corpo do elefante, emitir o som caracteristico e registrar missoes, desafios e legados no banco de dados.
+              Visual customizado para web design a partir da silhueta frontal do elefante e partilhado entre as engenharias. Toque na tromba trifasica para carregar o corpo, emitir o som e salvar missoes e legados no banco.
             </p>
           </div>
 
@@ -890,33 +911,21 @@ export default function EngineeringDequeStudio({
             <button
               type="button"
               onClick={() => setShowGuides((g) => !g)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                showGuides
-                  ? "border-teal-600 bg-teal-600/10 text-teal-700 dark:border-teal-400 dark:text-teal-300"
-                  : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-              }`}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition `}
             >
               {showGuides ? "Guias: ON" : "Guias: OFF"}
             </button>
             <button
               type="button"
               onClick={() => setSoundEnabled((s) => !s)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                soundEnabled
-                  ? "border-sky-600 bg-sky-600/10 text-sky-700 dark:border-sky-400 dark:text-sky-300"
-                  : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-              }`}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition `}
             >
               {soundEnabled ? "Audio: ON" : "Audio: OFF"}
             </button>
             <button
               type="button"
               onClick={() => setAutoCirculate((v) => !v)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                autoCirculate
-                  ? "border-teal-600 bg-teal-600/10 text-teal-700 dark:border-teal-400 dark:text-teal-300"
-                  : "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-              }`}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition `}
             >
               {autoCirculate ? "Deque Auto: ON" : "Deque Auto: OFF"}
             </button>
@@ -937,13 +946,13 @@ export default function EngineeringDequeStudio({
           </div>
         </div>
 
-        {/* Insercao no FRONT ou REAR */}
+        {/* Insercao no FRONT ou REAR partilhada entre engenharias */}
         <div className="mt-4 grid gap-3 border-t border-zinc-200 pt-4 sm:grid-cols-2 lg:grid-cols-5 dark:border-zinc-800">
           <input
             type="text"
             value={customTitle}
             onChange={(e) => setCustomTitle(e.target.value)}
-            placeholder="Ex.: Subestacao Cerro-Gradle 138kV"
+            placeholder="Ex.: Modulo Cerro-Gradle Web Design"
             className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-950"
           />
           <select
@@ -980,7 +989,7 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Trilho Deque com anatomia limpa e cabo trifasico */}
+      {/* Trilho Deque com configuracao visual partilhada entre engenharias */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold">
@@ -1017,18 +1026,15 @@ export default function EngineeringDequeStudio({
             const isFront = idx === 0;
             const isRear = idx === deque.length - 1;
             const isSelected = selectedNode?.id === node.id;
+            const accent = getDisciplineAccent(node.discipline);
 
             return (
               <div
-                key={`${node.id}-${idx}`}
+                key={`-`}
                 onClick={() => setSelectedId(node.id)}
-                className={`cursor-pointer rounded-xl border p-4 transition-all ${
-                  isSelected
-                    ? "border-teal-600 bg-teal-50/30 ring-2 ring-teal-600/30 dark:border-teal-400 dark:bg-teal-950/20"
-                    : "border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950/60"
-                }`}
+                className={`cursor-pointer rounded-xl border p-4 transition-all `}
               >
-                <div className="mb-2.5 flex items-center justify-between gap-2">
+                <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="font-mono text-xs font-semibold text-zinc-500">
                     #{idx + 1} · {node.code}
                   </span>
@@ -1046,7 +1052,13 @@ export default function EngineeringDequeStudio({
                   </div>
                 </div>
 
-                <ThreePhaseElephantCanvas
+                <div className="mb-2 text-center">
+                  <span className={`inline-block rounded px-2 py-0.5 font-mono text-[10px] font-semibold `}>
+                    {accent.tag}
+                  </span>
+                </div>
+
+                <WebDesignElephantCanvas
                   node={node}
                   chargePct={chargePct}
                   onTrunkChargeTick={handleTrunkChargeTick}
@@ -1077,18 +1089,14 @@ export default function EngineeringDequeStudio({
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
                     <div
                       className="h-full bg-teal-600 transition-all duration-300 dark:bg-teal-400"
-                      style={{ width: `${node.sdlcProgress}%` }}
+                      style={{ width: `%` }}
                     />
                   </div>
                 </div>
 
                 <div className="mt-3 flex items-center justify-between border-t border-zinc-200 pt-2.5 text-[11px] dark:border-zinc-800">
                   <span
-                    className={`font-semibold ${
-                      node.licenseActive
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : "text-amber-700 dark:text-amber-400"
-                    }`}
+                    className={`font-semibold `}
                   >
                     {node.licenseActive ? "Licenca Producao Ativa" : "Aguardando Compra"}
                   </span>
@@ -1100,14 +1108,14 @@ export default function EngineeringDequeStudio({
         </div>
       </section>
 
-      {/* Bancada interativa de carga trifasica + Compra/Download + Dados Brutos + Protocolos + Logs */}
+      {/* Bancada interativa + Compra/Download + Dados Brutos + Protocolos + Logs */}
       {selectedNode && (
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-2xs lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <span className="font-mono text-xs text-teal-700 dark:text-teal-400">
-                  BANCADA DE ENGENHARIA ELETRICA · {selectedNode.code} · CARGA DO CORPO: {chargePct}%
+                  BANCADA WEB DESIGN PARTILHADA · {selectedNode.code} · CARGA DO CORPO: {chargePct}%
                 </span>
                 <h3 className="text-lg font-semibold">{selectedNode.title}</h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -1125,7 +1133,7 @@ export default function EngineeringDequeStudio({
             </div>
 
             <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-950/50">
-              <ThreePhaseElephantCanvas
+              <WebDesignElephantCanvas
                 node={selectedNode}
                 chargePct={chargePct}
                 onTrunkChargeTick={handleTrunkChargeTick}
@@ -1143,7 +1151,7 @@ export default function EngineeringDequeStudio({
                 <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
                   <div
                     className="h-full bg-gradient-to-r from-amber-500 via-sky-400 to-teal-400 transition-all duration-200"
-                    style={{ width: `${chargePct}%` }}
+                    style={{ width: `%` }}
                   />
                 </div>
               </div>
@@ -1160,11 +1168,7 @@ export default function EngineeringDequeStudio({
                       key={mode}
                       type="button"
                       onClick={() => setActiveDelivery(mode)}
-                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                        activeDelivery === mode
-                          ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950"
-                          : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
-                      }`}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition `}
                     >
                       {deliveryLabel(mode)}
                     </button>
@@ -1193,28 +1197,20 @@ export default function EngineeringDequeStudio({
             <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Dados Brutos de Engenharia Eletrica:
+                  Dados Brutos de Engenharia:
                 </span>
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => setRawTab("telemetry")}
-                    className={`rounded px-2 py-1 text-[11px] font-medium ${
-                      rawTab === "telemetry"
-                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
-                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                    }`}
+                    className={`rounded px-2 py-1 text-[11px] font-medium `}
                   >
                     Frame Bruto
                   </button>
                   <button
                     type="button"
                     onClick={() => setRawTab("json")}
-                    className={`rounded px-2 py-1 text-[11px] font-medium ${
-                      rawTab === "json"
-                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
-                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                    }`}
+                    className={`rounded px-2 py-1 text-[11px] font-medium `}
                   >
                     Payload JSON
                   </button>
@@ -1223,7 +1219,7 @@ export default function EngineeringDequeStudio({
 
               <pre className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-[11px] text-teal-300">
                 {rawTab === "telemetry"
-                  ? `${selectedNode.rawSample.rawTelemetryFrame}\nTRUNK_3F_CHARGE=${chargePct}% | DELIVERY=${activeDelivery.toUpperCase()} | LICENSE=${selectedNode.licenseActive ? "ACTIVE_PROD" : "PENDING"}`
+                  ? `\nTRUNK_3F_CHARGE=% | DELIVERY= | LICENSE=`
                   : selectedNode.rawSample.payloadJson}
               </pre>
             </div>
@@ -1247,11 +1243,7 @@ export default function EngineeringDequeStudio({
                       key={key}
                       type="button"
                       onClick={() => toggleProtocol(selectedNode.id, key)}
-                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition ${
-                        ok
-                          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200"
-                          : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200"
-                      }`}
+                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-xs transition `}
                     >
                       <span>{label}</span>
                       <span className="font-mono text-[11px] font-bold">
@@ -1310,11 +1302,7 @@ export default function EngineeringDequeStudio({
           {missionsAndLegacies.map((item) => (
             <div
               key={item.id}
-              className={`rounded-xl border p-4 ${
-                item.completed
-                  ? "border-emerald-500/40 bg-emerald-500/5"
-                  : "border-zinc-200 bg-zinc-50/60 dark:border-zinc-800 dark:bg-zinc-950/50"
-              }`}
+              className={`rounded-xl border p-4 `}
             >
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="text-teal-700 dark:text-teal-400">MISSAO</span>
@@ -1379,3 +1367,4 @@ export default function EngineeringDequeStudio({
     </div>
   );
 }
+
